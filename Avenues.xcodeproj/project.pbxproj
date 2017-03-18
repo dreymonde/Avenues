@@ -29,6 +29,9 @@
 		7C4754ED1E7D921500009209 /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754E71E7D921500009209 /* Storage.swift */; };
 		7C4754EE1E7D921500009209 /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754E71E7D921500009209 /* Storage.swift */; };
 		7C4754EF1E7D921500009209 /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754E71E7D921500009209 /* Storage.swift */; };
+		7C4754F11E7D9DA900009209 /* Avenues+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754F01E7D9DA900009209 /* Avenues+UIKit.swift */; };
+		7C4754F21E7D9DAA00009209 /* Avenues+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754F01E7D9DA900009209 /* Avenues+UIKit.swift */; };
+		7C4754F31E7D9DAA00009209 /* Avenues+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754F01E7D9DA900009209 /* Avenues+UIKit.swift */; };
 		DD7502861C68FDDC006590AF /* AvenuesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52D6D9971BEFF375002C0205 /* AvenuesTests.swift */; };
 		DD7502881C68FEDE006590AF /* Avenues.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D6DA0F1BF000BD002C0205 /* Avenues.framework */; };
 		DD7502921C690C7A006590AF /* Avenues.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D6D9F01BEFFFBE002C0205 /* Avenues.framework */; };
@@ -71,6 +74,7 @@
 		7C4754E01E7D7E2C00009209 /* URLSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = URLSession.swift; path = Sources/URLSession.swift; sourceTree = "<group>"; };
 		7C4754E61E7D921500009209 /* Lane.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Lane.swift; path = Sources/Lane.swift; sourceTree = "<group>"; };
 		7C4754E71E7D921500009209 /* Storage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Storage.swift; path = Sources/Storage.swift; sourceTree = "<group>"; };
+		7C4754F01E7D9DA900009209 /* Avenues+UIKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Avenues+UIKit.swift"; path = "Sources/Avenues+UIKit.swift"; sourceTree = "<group>"; };
 		AD2FAA261CD0B6D800659CF4 /* Avenues.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Avenues.plist; sourceTree = "<group>"; };
 		AD2FAA281CD0B6E100659CF4 /* AvenuesTests.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = AvenuesTests.plist; sourceTree = "<group>"; };
 		DD75027A1C68FCFC006590AF /* Avenues-macOS Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Avenues-macOS Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -141,6 +145,7 @@
 				7C4754E71E7D921500009209 /* Storage.swift */,
 				52D6D9961BEFF375002C0205 /* Avenues.swift */,
 				7C4754E01E7D7E2C00009209 /* URLSession.swift */,
+				7C4754F01E7D9DA900009209 /* Avenues+UIKit.swift */,
 				52D6D9971BEFF375002C0205 /* AvenuesTests.swift */,
 				52D6D99C1BEFF38C002C0205 /* Configs */,
 				52D6D97D1BEFF229002C0205 /* Products */,
@@ -466,6 +471,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7C4754F11E7D9DA900009209 /* Avenues+UIKit.swift in Sources */,
 				52D6D9981BEFF375002C0205 /* Avenues.swift in Sources */,
 				7C4754E81E7D921500009209 /* Lane.swift in Sources */,
 				7C4754DB1E7D79AE00009209 /* Synchronized.swift in Sources */,
@@ -486,6 +492,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7C4754F21E7D9DAA00009209 /* Avenues+UIKit.swift in Sources */,
 				52D6D9EA1BEFFFA4002C0205 /* Avenues.swift in Sources */,
 				7C4754EA1E7D921500009209 /* Lane.swift in Sources */,
 				7C4754DD1E7D79AE00009209 /* Synchronized.swift in Sources */,
@@ -498,6 +505,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7C4754F31E7D9DAA00009209 /* Avenues+UIKit.swift in Sources */,
 				52D6DA091BF00081002C0205 /* Avenues.swift in Sources */,
 				7C4754EB1E7D921500009209 /* Lane.swift in Sources */,
 				7C4754DE1E7D79AE00009209 /* Synchronized.swift in Sources */,

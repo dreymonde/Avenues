@@ -12,7 +12,7 @@ public protocol AvenueStorageProtocol {
     
 }
 
-public struct AvenueStorage<Key : Hashable, Value> {
+public struct AvenueStorage<Key : Hashable, Value> : AvenueStorageProtocol {
     
     public typealias Get = (Key) -> Value?
     public typealias Set = (Value?, Key) -> ()

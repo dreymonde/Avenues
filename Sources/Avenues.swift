@@ -16,13 +16,13 @@ public final class Avenue<Key : Hashable, Value> {
     fileprivate let storage: AvenueStorage<Key, Value>
     fileprivate let lane: AvenueLane<Key, Value>
     
-    fileprivate let processingQueue = DispatchQueue(label: "AvenueQueue")
+    fileprivate let processingQueue = DispatchQueue(label: "AvenueQueue", qos: DispatchQoS.userInitiated)
     
-    internal init(_storage: AvenueStorage<Key, Value>,
+    fileprivate init(storage: AvenueStorage<Key, Value>,
          lane: AvenueLane<Key, Value>,
          onError: @escaping (Error, Key) -> () = { _ in },
          onStateChange: @escaping (Key) -> ()) {
-        self.storage = _storage
+        self.storage = storage
         self.lane = lane
         self.onError = onError
         self.onStateChange = onStateChange
@@ -71,22 +71,22 @@ public final class Avenue<Key : Hashable, Value> {
 
 public extension Avenue {
     
-    convenience init(storage: AvenueStorage<Key, Value>,
-                     lane: AvenueLane<Key, Value>,
-                     onError: @escaping (Error, Key) -> () = { _ in },
-                     onStateChange: @escaping (Key) -> ()) {
-        self.init(_storage: storage,
-                  lane: lane,
-                  onError: { error, key in DispatchQueue.main.async { onError(error, key) } },
-                  onStateChange: { key in DispatchQueue.main.async { onStateChange(key) } })
+    static func ui<Storage : AvenueStorageProtocol, Lane : AvenueLaneProtocol>(storage: Storage,
+                   lane: Lane,
+                   onError: @escaping (Error, Key) -> () = { _ in },
+                   onStateChange: @escaping (Key) -> ()) -> Avenue where Storage.Key == Key, Storage.Value == Value, Lane.Key == Key, Lane.Value == Value {
+        return Avenue(storage: AvenueStorage(storage),
+                      lane: AvenueLane(lane),
+                      onError: { error, key in DispatchQueue.main.async { onError(error, key) } },
+                      onStateChange: { key in DispatchQueue.main.async { onStateChange(key) } })
     }
     
-    static func notOnMainQueue(storage: AvenueStorage<Key, Value>,
-                               lane: AvenueLane<Key, Value>,
+    static func notOnMainQueue<Storage : AvenueStorageProtocol, Lane : AvenueLaneProtocol>(storage: Storage,
+                               lane: Lane,
                                onError: @escaping (Error, Key) -> () = { _ in },
-                               onStateChange: @escaping (Key) -> ()) -> Avenue {
-        return Avenue(_storage: storage,
-                      lane: lane,
+                               onStateChange: @escaping (Key) -> ()) -> Avenue where Storage.Key == Key, Storage.Value == Value, Lane.Key == Key, Lane.Value == Value {
+        return Avenue(storage: AvenueStorage(storage),
+                      lane: AvenueLane(lane),
                       onError: onError,
                       onStateChange: onStateChange)
     }

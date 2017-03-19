@@ -13,12 +13,12 @@ public final class Avenue<Key : Hashable, Value> {
     fileprivate let onStateChange: (Key) -> ()
     fileprivate let onError: (Error, Key) -> ()
     
-    fileprivate let storage: AvenueStorage<Key, Value>
+    fileprivate let storage: Storage<Key, Value>
     fileprivate let fetcher: Fetcher<Key, Value>
     
     fileprivate let processingQueue = DispatchQueue(label: "AvenueQueue", qos: DispatchQoS.userInitiated)
     
-    fileprivate init(storage: AvenueStorage<Key, Value>,
+    fileprivate init(storage: Storage<Key, Value>,
          fetcher: Fetcher<Key, Value>,
          onError: @escaping (Error, Key) -> () = { _ in },
          onStateChange: @escaping (Key) -> ()) {
@@ -32,7 +32,7 @@ public final class Avenue<Key : Hashable, Value> {
         return storage.value(for: key)
     }
     
-    public func cancelPreparation(ofItemAt key: Key) {
+    public func cancelFetch(ofItemAt key: Key) {
         print("Cancelling download at \(key)")
         processingQueue.async {
             self.fetcher.cancel(key: key)
@@ -71,21 +71,21 @@ public final class Avenue<Key : Hashable, Value> {
 
 public extension Avenue {
     
-    static func ui<Storage : AvenueStorageProtocol, FetcherType : FetcherProtocol>(storage: Storage,
+    static func ui<StorageType : StorageProtocol, FetcherType : FetcherProtocol>(storage: StorageType,
                    fetcher: FetcherType,
                    onError: @escaping (Error, Key) -> () = { _ in },
-                   onStateChange: @escaping (Key) -> ()) -> Avenue where Storage.Key == Key, Storage.Value == Value, FetcherType.Key == Key, FetcherType.Value == Value {
-        return Avenue(storage: AvenueStorage(storage),
+                   onStateChange: @escaping (Key) -> ()) -> Avenue where StorageType.Key == Key, StorageType.Value == Value, FetcherType.Key == Key, FetcherType.Value == Value {
+        return Avenue(storage: Storage(storage),
                       fetcher: Fetcher(fetcher),
                       onError: { error, key in DispatchQueue.main.async { onError(error, key) } },
                       onStateChange: { key in DispatchQueue.main.async { onStateChange(key) } })
     }
     
-    static func notOnMainQueue<Storage : AvenueStorageProtocol, FetcherType : FetcherProtocol>(storage: Storage,
+    static func notOnMainQueue<StorageType : StorageProtocol, FetcherType : FetcherProtocol>(storage: StorageType,
                                fetcher: FetcherType,
                                onError: @escaping (Error, Key) -> () = { _ in },
-                               onStateChange: @escaping (Key) -> ()) -> Avenue where Storage.Key == Key, Storage.Value == Value, FetcherType.Key == Key, FetcherType.Value == Value {
-        return Avenue(storage: AvenueStorage(storage),
+                               onStateChange: @escaping (Key) -> ()) -> Avenue where StorageType.Key == Key, StorageType.Value == Value, FetcherType.Key == Key, FetcherType.Value == Value {
+        return Avenue(storage: Storage(storage),
                       fetcher: Fetcher(fetcher),
                       onError: onError,
                       onStateChange: onStateChange)

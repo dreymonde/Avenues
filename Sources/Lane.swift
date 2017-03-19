@@ -34,10 +34,10 @@ public struct Fetcher<Key : Hashable, Value> : FetcherProtocol {
         self._isRunning = isRunning
     }
     
-    public init<Lane : FetcherProtocol>(_ lane: Lane) where Lane.Key == Key, Lane.Value == Value {
-        self._start = lane.start
-        self._cancel = lane.cancel
-        self._isRunning = lane.isRunning
+    public init<FetcherType : FetcherProtocol>(_ fetcher: FetcherType) where FetcherType.Key == Key, FetcherType.Value == Value {
+        self._start = fetcher.start
+        self._cancel = fetcher.cancel
+        self._isRunning = fetcher.isRunning
     }
     
     public func start(key: Key, completion: @escaping (FetcherResult<Value>) -> ()) {

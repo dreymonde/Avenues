@@ -7,9 +7,9 @@
                               onError: @escaping (Error, IndexPath) -> () = { _ in },
                               onStateChange: @escaping (IndexPath) -> ()) -> Avenue<IndexPath, UIImage> {
         let sessionLane = URLSessionFetcher<IndexPath, UIImage>(getURL: indexPathToURL)
-        let storage = AvenueStorage<IndexPath, UIImage>.nsCache()
+        let storage = Storage<IndexPath, UIImage>.nsCache()
         return Avenue<IndexPath, UIImage>.ui(storage: storage,
-                                             lane: sessionLane,
+                                             fetcher: sessionLane,
                                              onError: onError,
                                              onStateChange: onStateChange)
     }

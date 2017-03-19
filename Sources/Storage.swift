@@ -2,7 +2,7 @@
     import Foundation
 #endif
 
-public protocol AvenueStorageProtocol {
+public protocol StorageProtocol {
     
     associatedtype Key : Hashable
     associatedtype Value
@@ -12,21 +12,21 @@ public protocol AvenueStorageProtocol {
     
 }
 
-public struct AvenueStorage<Key : Hashable, Value> : AvenueStorageProtocol {
+public struct Storage<Key : Hashable, Value> : StorageProtocol {
     
     public typealias Get = (Key) -> Value?
     public typealias Set = (Value?, Key) -> ()
     
-    private let _get: AvenueStorage.Get
-    private let _set: AvenueStorage.Set
+    private let _get: Storage.Get
+    private let _set: Storage.Set
     
-    public init(get: @escaping AvenueStorage.Get,
-                set: @escaping AvenueStorage.Set) {
+    public init(get: @escaping Storage.Get,
+                set: @escaping Storage.Set) {
         self._get = get
         self._set = set
     }
     
-    public init<Storage : AvenueStorageProtocol>(_ storage: Storage)
+    public init<Storage : StorageProtocol>(_ storage: Storage)
             where Storage.Key == Key, Storage.Value == Value {
         self._get = storage.value(for:)
         self._set = storage.set
@@ -42,11 +42,11 @@ public struct AvenueStorage<Key : Hashable, Value> : AvenueStorageProtocol {
     
 }
 
-extension AvenueStorage {
+extension Storage {
 
-    public static func dictionaryBased() -> AvenueStorage {
+    public static func dictionaryBased() -> Storage {
         var dictionary: [Key : Value] = [:]
-        return AvenueStorage.synchronized(get: { dictionary[$0] },
+        return Storage.synchronized(get: { dictionary[$0] },
                                           set: { dictionary[$1] = $0 })
     }
     
@@ -54,28 +54,28 @@ extension AvenueStorage {
 
 #if os(iOS) || os(OSX) || os(watchOS) || os(tvOS)
 
-    extension AvenueStorage {
+    extension Storage {
         
-        public static func synchronized(get: @escaping AvenueStorage.Get,
-                                        set: @escaping AvenueStorage.Set) -> AvenueStorage {
+        public static func synchronized(get: @escaping Storage.Get,
+                                        set: @escaping Storage.Set) -> Storage {
             let queue = DispatchQueue(label: "com.avenues.storage-dispatch-queue")
-            let threadSafeGet: AvenueStorage.Get = { key in
+            let threadSafeGet: Storage.Get = { key in
                 return queue.sync { return get(key) }
             }
-            let threadSafeSet: AvenueStorage.Set = { value, key in
+            let threadSafeSet: Storage.Set = { value, key in
                 queue.sync { set(value, key) }
             }
-            return AvenueStorage(get: threadSafeGet,
+            return Storage(get: threadSafeGet,
                                  set: threadSafeSet)
         }
         
     }
     
-    extension AvenueStorage where Value : AnyObject {
+    extension Storage where Value : AnyObject {
         
-        public static func nsCache() -> AvenueStorage<IndexPath, Value> {
+        public static func nsCache() -> Storage<IndexPath, Value> {
             let cache = NSCache<NSIndexPath, Value>()
-            return AvenueStorage<IndexPath, Value>(get: { key in cache.object(forKey: key as NSIndexPath) },
+            return Storage<IndexPath, Value>(get: { key in cache.object(forKey: key as NSIndexPath) },
                                                    set: { value, key in
                                                     if let value = value {
                                                         cache.setObject(value, forKey: key as NSIndexPath)

@@ -14,16 +14,16 @@ public final class Avenue<Key : Hashable, Value> {
     fileprivate let onError: (Error, Key) -> ()
     
     fileprivate let storage: AvenueStorage<Key, Value>
-    fileprivate let lane: AvenueLane<Key, Value>
+    fileprivate let fetcher: Fetcher<Key, Value>
     
     fileprivate let processingQueue = DispatchQueue(label: "AvenueQueue", qos: DispatchQoS.userInitiated)
     
     fileprivate init(storage: AvenueStorage<Key, Value>,
-         lane: AvenueLane<Key, Value>,
+         fetcher: Fetcher<Key, Value>,
          onError: @escaping (Error, Key) -> () = { _ in },
          onStateChange: @escaping (Key) -> ()) {
         self.storage = storage
-        self.lane = lane
+        self.fetcher = fetcher
         self.onError = onError
         self.onStateChange = onStateChange
     }
@@ -35,7 +35,7 @@ public final class Avenue<Key : Hashable, Value> {
     public func cancelPreparation(ofItemAt key: Key) {
         print("Cancelling download at \(key)")
         processingQueue.async {
-            self.lane.cancel(key: key)
+            self.fetcher.cancel(key: key)
         }
     }
     
@@ -46,11 +46,11 @@ public final class Avenue<Key : Hashable, Value> {
     }
     
     fileprivate func _prepareItem(at key: Key) {
-        if !lane.isRunning(key: key) {
+        if !fetcher.isRunning(key: key) {
             guard storage.value(for: key) == nil else {
                 return
             }
-            lane.start(key: key, completion: { (result) in
+            fetcher.start(key: key, completion: { (result) in
                 switch result {
                 case .success(let value):
                     print("Have an image at \(key), storing")
@@ -58,7 +58,7 @@ public final class Avenue<Key : Hashable, Value> {
                     self.onStateChange(key)
                 case .failure(let error):
                     print("Errored downloading image at \(key), removing operation from dict. Error: \(key)")
-                    self.lane.cancel(key: key)
+                    self.fetcher.cancel(key: key)
                     self.onError(error, key)
                 }
             })
@@ -71,22 +71,22 @@ public final class Avenue<Key : Hashable, Value> {
 
 public extension Avenue {
     
-    static func ui<Storage : AvenueStorageProtocol, Lane : AvenueLaneProtocol>(storage: Storage,
-                   lane: Lane,
+    static func ui<Storage : AvenueStorageProtocol, FetcherType : FetcherProtocol>(storage: Storage,
+                   fetcher: FetcherType,
                    onError: @escaping (Error, Key) -> () = { _ in },
-                   onStateChange: @escaping (Key) -> ()) -> Avenue where Storage.Key == Key, Storage.Value == Value, Lane.Key == Key, Lane.Value == Value {
+                   onStateChange: @escaping (Key) -> ()) -> Avenue where Storage.Key == Key, Storage.Value == Value, FetcherType.Key == Key, FetcherType.Value == Value {
         return Avenue(storage: AvenueStorage(storage),
-                      lane: AvenueLane(lane),
+                      fetcher: Fetcher(fetcher),
                       onError: { error, key in DispatchQueue.main.async { onError(error, key) } },
                       onStateChange: { key in DispatchQueue.main.async { onStateChange(key) } })
     }
     
-    static func notOnMainQueue<Storage : AvenueStorageProtocol, Lane : AvenueLaneProtocol>(storage: Storage,
-                               lane: Lane,
+    static func notOnMainQueue<Storage : AvenueStorageProtocol, FetcherType : FetcherProtocol>(storage: Storage,
+                               fetcher: FetcherType,
                                onError: @escaping (Error, Key) -> () = { _ in },
-                               onStateChange: @escaping (Key) -> ()) -> Avenue where Storage.Key == Key, Storage.Value == Value, Lane.Key == Key, Lane.Value == Value {
+                               onStateChange: @escaping (Key) -> ()) -> Avenue where Storage.Key == Key, Storage.Value == Value, FetcherType.Key == Key, FetcherType.Value == Value {
         return Avenue(storage: AvenueStorage(storage),
-                      lane: AvenueLane(lane),
+                      fetcher: Fetcher(fetcher),
                       onError: onError,
                       onStateChange: onStateChange)
     }

@@ -22,12 +22,12 @@
         
     }
     
-    public enum URLSessionAvenueLaneError : Error {
+    public enum URLSessionFetcherError : Error {
         case responseIsNotHTTP(URLResponse?)
         case noData
     }
     
-    public class URLSessionAvenueLane<Key : Hashable, Value> : AvenueLaneProtocol {
+    public class URLSessionFetcher<Key : Hashable, Value> : FetcherProtocol {
         
         fileprivate let transformValue: (Data) throws -> Value
         fileprivate let getURL: (Key) -> URL?
@@ -46,7 +46,7 @@
             self.transformValue = transform
         }
         
-        public func start(key: Key, completion: @escaping (AvenueLaneResult<Value>) -> ()) {
+        public func start(key: Key, completion: @escaping (FetcherResult<Value>) -> ()) {
             guard let url = getURL(key) else {
                 return
             }
@@ -71,19 +71,19 @@
         fileprivate func didFinishTask(data: Data?,
                                        response: URLResponse?,
                                        error: Error?,
-                                       completion: @escaping (AvenueLaneResult<Value>) -> ()) {
+                                       completion: @escaping (FetcherResult<Value>) -> ()) {
             if let error = error {
                 completion(.failure(error))
                 return
             }
             guard let httpResponse = response as? HTTPURLResponse else {
-                completion(.failure(URLSessionAvenueLaneError.responseIsNotHTTP(response)))
+                completion(.failure(URLSessionFetcherError.responseIsNotHTTP(response)))
                 return
             }
             do {
                 try self.validateResponse(httpResponse)
                 guard let data = data else {
-                    throw URLSessionAvenueLaneError.noData
+                    throw URLSessionFetcherError.noData
                 }
                 let value = try self.transformValue(data)
                 completion(.success(value))
@@ -94,7 +94,7 @@
         
     }
     
-    public extension URLSessionAvenueLane where Value : DataConvertible {
+    public extension URLSessionFetcher where Value : DataConvertible {
         
         convenience init(session: URLSession = .shared,
                          getURL: @escaping (Key) -> URL?,

@@ -71,7 +71,6 @@ extension AvenueStorage {
         
     }
     
-    
     extension AvenueStorage where Value : AnyObject {
         
         public static func nsCache() -> AvenueStorage<IndexPath, Value> {

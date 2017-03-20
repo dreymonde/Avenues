@@ -91,7 +91,7 @@ public extension StorageProtocol {
         
         public let cache: NSCache<Key, Value>
         
-        init(cache: NSCache<Key, Value>) {
+        init(cache: NSCache<Key, Value> = NSCache()) {
             self.cache = cache
         }
         

@@ -27,56 +27,56 @@
         case noData
     }
     
-    public class URLSessionFetcher<Key : Hashable, Value> : FetcherProtocol {
+    public class URLSessionFetcher : FetcherProtocol {
         
-        fileprivate let transformValue: (Data) throws -> Value
-        fileprivate let getURL: (Key) -> URL?
+        public typealias Key = URL
+        public typealias Value = Data
+        
         fileprivate let validateResponse: (HTTPURLResponse) throws -> ()
         public let session: URLSession
         
-        fileprivate(set) var running: Synchronized<[Key : URLSessionTask]> = Synchronized([:])
-        public var runningTasks: [Key : URLSessionTask] {
+        fileprivate(set) var running: Synchronized<[URL : URLSessionTask]> = Synchronized([:])
+        public var runningTasks: [URL : URLSessionTask] {
             return running.get()
         }
         
         public init(session: URLSession = .shared,
-                    getURL: @escaping (Key) -> URL?,
-                    validateResponse: @escaping (HTTPURLResponse) throws -> () = { _ in },
-                    transform: @escaping (Data) throws -> Value) {
+                    validateResponse: @escaping (HTTPURLResponse) throws -> () = { _ in }) {
             self.session = session
-            self.getURL = getURL
             self.validateResponse = validateResponse
-            self.transformValue = transform
         }
         
         deinit {
             avenues_print("Deinit \(self)")
         }
         
-        public func start(key: Key, completion: @escaping (FetcherResult<Value>) -> ()) {
-            guard let url = getURL(key) else {
-                return
-            }
+        public func start(key url: URL, completion: @escaping (FetcherResult<Value>) -> ()) {
             let task = session.dataTask(with: url) { [weak self] (data, response, error) in
                 self?.didFinishTask(data: data, response: response, error: error, completion: completion)
             }
-            running.set({ (dict: inout [Key : URLSessionTask]) in dict[key] = task })
+            running.set({ (dict: inout [URL : URLSessionTask]) in dict[url] = task })
             task.resume()
         }
         
         public func cancel(key: Key) {
-            running.set { (dict: inout [Key : URLSessionTask]) in
+            running.set { (dict: inout [URL : URLSessionTask]) in
                 dict[key]?.cancel()
                 dict[key] = nil
             }
         }
         
-        public func isRunning(key: Key) -> Bool {
-            return running.get()[key] != nil
-        }
-        
-        public func isCompleted(key: Key) -> Bool {
-            return running.get()[key]?.state == .completed
+        public func fetchingState(key: Key) -> FetchingState {
+            if let task = running.get()[key] {
+                switch task.state {
+                case .running, .canceling:
+                    return .running
+                case .completed:
+                    return .completed
+                case .suspended:
+                    return .none
+                }
+            }
+            return .none
         }
         
         fileprivate func didFinishTask(data: Data?,
@@ -96,28 +96,18 @@
                 guard let data = data else {
                     throw URLSessionFetcherError.noData
                 }
-                let value = try self.transformValue(data)
-                completion(.success(value))
+                completion(.success(data))
             } catch {
                 completion(.failure(error))
             }
         }
         
-    }
-    
-    public extension URLSessionFetcher where Value : DataConvertible {
-        
-        convenience init(session: URLSession = .shared,
-                         getURL: @escaping (Key) -> URL?,
-                         validateResponse: @escaping (HTTPURLResponse) throws -> () = { _ in }) {
-            self.init(session: session,
-                      getURL: getURL,
-                      validateResponse: validateResponse,
-                      transform: Value.fromData)
+        public func mapValue<Convertible : DataConvertible>() -> Fetcher<URL, Convertible> {
+            return mapValue(Convertible.fromData)
         }
         
     }
-    
+        
 #endif
 
 #if os(iOS) || os(watchOS) || os(tvOS)

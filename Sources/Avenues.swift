@@ -63,7 +63,7 @@ public final class Avenue<Key : Hashable, Value> {
     
     fileprivate func _prepareItem(at key: Key) {
         if storage.value(for: key) == nil {
-            if !fetcher.isInFlight(key: key) {
+            if fetcher.fetchingState(key: key) != .running {
                 fetcher.start(key: key, completion: { (result) in
                     switch result {
                     case .success(let value):

@@ -16,7 +16,7 @@ internal func avenues_print(_ items: Any...) {
 
 public enum Log {
     
-    static var isEnabled = false
+    public static var isEnabled = false
     
 }
 

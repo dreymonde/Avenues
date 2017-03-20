@@ -8,6 +8,18 @@
 
 import Foundation
 
+internal func avenues_print(_ items: Any...) {
+    if Log.isEnabled {
+        print(items)
+    }
+}
+
+public enum Log {
+    
+    static var isEnabled = false
+    
+}
+
 public final class Avenue<Key : Hashable, Value> {
     
     fileprivate let onStateChange: (Key) -> ()
@@ -29,7 +41,7 @@ public final class Avenue<Key : Hashable, Value> {
     }
     
     deinit {
-        print("Deinit \(self)")
+        avenues_print("Deinit \(self)")
     }
     
     public func item(at key: Key) -> Value? {
@@ -37,7 +49,7 @@ public final class Avenue<Key : Hashable, Value> {
     }
     
     public func cancelFetch(ofItemAt key: Key) {
-        print("Cancelling download at \(key)")
+        avenues_print("Cancelling download at \(key)")
         processingQueue.async {
             self.fetcher.cancel(key: key)
         }
@@ -55,20 +67,20 @@ public final class Avenue<Key : Hashable, Value> {
                 fetcher.start(key: key, completion: { (result) in
                     switch result {
                     case .success(let value):
-                        print("Have an image at \(key), storing")
+                        avenues_print("Have an image at \(key), storing")
                         self.storage.set(value, for: key)
                         self.onStateChange(key)
                     case .failure(let error):
-                        print("Errored downloading image at \(key), removing operation from dict. Error: \(key)")
+                        avenues_print("Errored downloading image at \(key), removing operation from dict. Error: \(key)")
                         self.fetcher.cancel(key: key)
                         self.onError(error, key)
                     }
                 })
             } else {
-                print("Fetching is already in flight for \(key)")
+                avenues_print("Fetching is already in flight for \(key)")
             }
         } else {
-            print("Value already exists for \(key)")
+            avenues_print("Value already exists for \(key)")
         }
     }
     

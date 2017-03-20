@@ -50,8 +50,7 @@
         }
         
         deinit {
-            // session.invalidateAndCancel()
-            print("Deinit \(self)")
+            avenues_print("Deinit \(self)")
         }
         
         public func start(key: Key, completion: @escaping (FetcherResult<Value>) -> ()) {

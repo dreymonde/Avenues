@@ -8,9 +8,9 @@
 
 import Foundation
 
-internal func avenues_print(_ items: Any...) {
+internal func avenues_print(_ item: Any) {
     if Log.isEnabled {
-        print(items)
+        print(item)
     }
 }
 

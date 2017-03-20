@@ -28,6 +28,10 @@ public final class Avenue<Key : Hashable, Value> {
         self.onStateChange = onStateChange
     }
     
+    deinit {
+        print("Deinit \(self)")
+    }
+    
     public func item(at key: Key) -> Value? {
         return storage.value(for: key)
     }

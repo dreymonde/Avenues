@@ -31,7 +31,7 @@ public struct Storage<Key : Hashable, Value> : StorageProtocol {
         self._get = storage.value(for:)
         self._set = storage.set
     }
-    
+        
     public func value(for key: Key) -> Value? {
         return _get(key)
     }

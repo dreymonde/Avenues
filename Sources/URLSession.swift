@@ -49,6 +49,11 @@
             self.transformValue = transform
         }
         
+        deinit {
+            // session.invalidateAndCancel()
+            print("Deinit \(self)")
+        }
+        
         public func start(key: Key, completion: @escaping (FetcherResult<Value>) -> ()) {
             guard let url = getURL(key) else {
                 return

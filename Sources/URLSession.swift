@@ -34,7 +34,10 @@
         fileprivate let validateResponse: (HTTPURLResponse) throws -> ()
         public let session: URLSession
         
-        public fileprivate(set) var running: Synchronized<[Key : URLSessionTask]> = Synchronized([:])
+        fileprivate(set) var running: Synchronized<[Key : URLSessionTask]> = Synchronized([:])
+        public var runningTasks: [Key : URLSessionTask] {
+            return running.get()
+        }
         
         public init(session: URLSession = .shared,
                     getURL: @escaping (Key) -> URL?,
@@ -66,6 +69,10 @@
         
         public func isRunning(key: Key) -> Bool {
             return running.get()[key] != nil
+        }
+        
+        public func isCompleted(key: Key) -> Bool {
+            return running.get()[key]?.state == .completed
         }
         
         fileprivate func didFinishTask(data: Data?,

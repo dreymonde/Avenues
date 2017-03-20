@@ -46,24 +46,25 @@ public final class Avenue<Key : Hashable, Value> {
     }
     
     fileprivate func _prepareItem(at key: Key) {
-        if !fetcher.isRunning(key: key) {
-            guard storage.value(for: key) == nil else {
-                return
+        if storage.value(for: key) == nil {
+            if !fetcher.isInFlight(key: key) {
+                fetcher.start(key: key, completion: { (result) in
+                    switch result {
+                    case .success(let value):
+                        print("Have an image at \(key), storing")
+                        self.storage.set(value, for: key)
+                        self.onStateChange(key)
+                    case .failure(let error):
+                        print("Errored downloading image at \(key), removing operation from dict. Error: \(key)")
+                        self.fetcher.cancel(key: key)
+                        self.onError(error, key)
+                    }
+                })
+            } else {
+                print("Fetching is already in flight for \(key)")
             }
-            fetcher.start(key: key, completion: { (result) in
-                switch result {
-                case .success(let value):
-                    print("Have an image at \(key), storing")
-                    self.storage.set(value, for: key)
-                    self.onStateChange(key)
-                case .failure(let error):
-                    print("Errored downloading image at \(key), removing operation from dict. Error: \(key)")
-                    self.fetcher.cancel(key: key)
-                    self.onError(error, key)
-                }
-            })
         } else {
-            print("Download for \(key) is already in-flight")
+            print("Value already exists for \(key)")
         }
     }
     

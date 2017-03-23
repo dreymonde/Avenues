@@ -79,6 +79,10 @@
             return .none
         }
         
+        public func cancelAll() {
+            session.invalidateAndCancel()
+        }
+        
         fileprivate func didFinishTask(data: Data?,
                                        response: URLResponse?,
                                        error: Error?,

@@ -55,10 +55,18 @@ public final class Avenue<Key : Hashable, Value> {
         }
     }
     
+    public func cancelAll() {
+        self.fetcher.cancelAll()
+    }
+    
     public func prepareItem(at key: Key) {
         processingQueue.async {
             self._prepareItem(at: key)
         }
+    }
+    
+    public func fetchingState(ofItemAt key: Key) -> FetchingState {
+        return fetcher.fetchingState(key: key)
     }
     
     fileprivate func _prepareItem(at key: Key) {
@@ -67,11 +75,11 @@ public final class Avenue<Key : Hashable, Value> {
                 fetcher.start(key: key, completion: { (result) in
                     switch result {
                     case .success(let value):
-                        avenues_print("Have an image at \(key), storing")
+                        avenues_print("Have an item at \(key), storing")
                         self.storage.set(value, for: key)
                         self.onStateChange(key)
                     case .failure(let error):
-                        avenues_print("Errored downloading image at \(key), removing operation from dict. Error: \(key)")
+                        avenues_print("Errored fetching item at \(key), cancelling fetch. Error: \(key)")
                         self.fetcher.cancel(key: key)
                         self.onError(error, key)
                     }
@@ -80,7 +88,7 @@ public final class Avenue<Key : Hashable, Value> {
                 avenues_print("Fetching is already in flight for \(key)")
             }
         } else {
-            avenues_print("Value already exists for \(key)")
+            avenues_print("Item already exists for \(key)")
         }
     }
     

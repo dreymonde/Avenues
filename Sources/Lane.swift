@@ -19,6 +19,7 @@ public protocol FetcherProtocol {
     func start(key: Key, completion: @escaping FetcherCompletion<Value>)
     func cancel(key: Key)
     func fetchingState(key: Key) -> FetchingState
+    func cancelAll()
     
 }
 
@@ -30,7 +31,8 @@ public extension FetcherProtocol {
         let getStage: Fetcher<OtherKey, Value>.GetState = { otherKey in self.fetchingState(key: transform(otherKey)) }
         return Fetcher(start: start,
                        cancel: cancel,
-                       getState: getStage)
+                       getState: getStage,
+                       cancelAll: cancelAll)
     }
     
     func mapValue<OtherValue>(_ transform: @escaping (Value) throws -> OtherValue) -> Fetcher<Key, OtherValue> {
@@ -51,7 +53,8 @@ public extension FetcherProtocol {
         }
         return Fetcher(start: start,
                        cancel: self.cancel(key:),
-                       getState: self.fetchingState(key:))
+                       getState: self.fetchingState(key:),
+                       cancelAll: cancelAll)
     }
     
 }
@@ -61,23 +64,28 @@ public struct Fetcher<Key : Hashable, Value> : FetcherProtocol {
     public typealias Start = (Key, @escaping FetcherCompletion<Value>) -> ()
     public typealias Cancel = (Key) -> ()
     public typealias GetState = (Key) -> FetchingState
+    public typealias CancelAll = () -> ()
     
     let _start: Fetcher.Start
     let _cancel: Fetcher.Cancel
     let _getState: Fetcher.GetState
+    let _cancelAll: Fetcher.CancelAll
     
     public init(start: @escaping Fetcher.Start,
                 cancel: @escaping Fetcher.Cancel,
-                getState: @escaping Fetcher.GetState) {
+                getState: @escaping Fetcher.GetState,
+                cancelAll: @escaping Fetcher.CancelAll) {
         self._start = start
         self._cancel = cancel
         self._getState = getState
+        self._cancelAll = cancelAll
     }
     
     public init<FetcherType : FetcherProtocol>(_ fetcher: FetcherType) where FetcherType.Key == Key, FetcherType.Value == Value {
         self._start = fetcher.start(key:completion:)
         self._cancel = fetcher.cancel(key:)
         self._getState = fetcher.fetchingState(key:)
+        self._cancelAll = fetcher.cancelAll
     }
     
     public func start(key: Key, completion: @escaping (FetcherResult<Value>) -> ()) {
@@ -90,6 +98,10 @@ public struct Fetcher<Key : Hashable, Value> : FetcherProtocol {
     
     public func fetchingState(key: Key) -> FetchingState {
         return _getState(key)
+    }
+    
+    public func cancelAll() {
+        _cancelAll()
     }
     
 }

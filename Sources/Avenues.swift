@@ -20,24 +20,47 @@ public enum Log {
     
 }
 
+public enum AvenueCallbackDispatchMode {
+    case mainQueue
+    case privateQueue
+    
+    internal var queue: DispatchQueue? {
+        switch self {
+        case .mainQueue:
+            return .main
+        case .privateQueue:
+            return nil
+        }
+    }
+}
+
 public final class Avenue<Key : Hashable, Value> {
     
-    fileprivate let onStateChange: (Key) -> ()
-    fileprivate let onError: (Error, Key) -> ()
+    public var onStateChange: (Key) -> ()
+    public var onError: (Error, Key) -> ()
     
     fileprivate let storage: Storage<Key, Value>
-    fileprivate let fetcher: Fetcher<Key, Value>
+    fileprivate let processor: Processor<Key, Value>
     
+    fileprivate let callbackQueue: DispatchQueue?
     fileprivate let processingQueue = DispatchQueue(label: "AvenueQueue", qos: DispatchQoS.userInitiated)
     
-    fileprivate init(storage: Storage<Key, Value>,
-         fetcher: Fetcher<Key, Value>,
-         onError: @escaping (Error, Key) -> () = { _ in },
-         onStateChange: @escaping (Key) -> ()) {
+    public init(storage: Storage<Key, Value>,
+                processor: Processor<Key, Value>,
+                callbackMode: AvenueCallbackDispatchMode = .mainQueue) {
         self.storage = storage
-        self.fetcher = fetcher
-        self.onError = onError
-        self.onStateChange = onStateChange
+        self.processor = processor
+        self.callbackQueue = callbackMode.queue
+        self.onError = { _ in avenues_print("No onError") }
+        self.onStateChange = { _ in avenues_print("No onStateChange") }
+    }
+    
+    private func dispatchCallback(callback: @escaping () -> ()) {
+        if let queue = callbackQueue {
+            queue.async { callback() }
+        } else {
+            callback()
+        }
     }
     
     deinit {
@@ -48,15 +71,15 @@ public final class Avenue<Key : Hashable, Value> {
         return storage.value(for: key)
     }
     
-    public func cancelFetch(ofItemAt key: Key) {
+    public func cancelProcessing(ofItemAt key: Key) {
         avenues_print("Cancelling download at \(key)")
         processingQueue.async {
-            self.fetcher.cancel(key: key)
+            self.processor.cancel(key: key)
         }
     }
     
     public func cancelAll() {
-        self.fetcher.cancelAll()
+        self.processor.cancelAll()
     }
     
     public func prepareItem(at key: Key) {
@@ -65,55 +88,35 @@ public final class Avenue<Key : Hashable, Value> {
         }
     }
     
-    public func fetchingState(ofItemAt key: Key) -> FetchingState {
-        return fetcher.fetchingState(key: key)
+    public func processingState(ofItemAt key: Key) -> ProcessingState {
+        return processor.processingState(key: key)
     }
     
     fileprivate func _prepareItem(at key: Key) {
         if storage.value(for: key) == nil {
-            if fetcher.fetchingState(key: key) != .running {
-                fetcher.start(key: key, completion: { (result) in
+            if processor.processingState(key: key) != .running {
+                processor.start(key: key, completion: { (result) in
                     switch result {
                     case .success(let value):
                         avenues_print("Have an item at \(key), storing")
                         self.storage.set(value, for: key)
-                        self.onStateChange(key)
+                        self.dispatchCallback {
+                            self.onStateChange(key)
+                        }
                     case .failure(let error):
-                        avenues_print("Errored fetching item at \(key), cancelling fetch. Error: \(key)")
-                        self.fetcher.cancel(key: key)
-                        self.onError(error, key)
+                        avenues_print("Errored processing item at \(key), cancelling processing. Error: \(key)")
+                        self.processor.cancel(key: key)
+                        self.dispatchCallback {
+                            self.onError(error, key)
+                        }
                     }
                 })
             } else {
-                avenues_print("Fetching is already in flight for \(key)")
+                avenues_print("Processing is already in flight for \(key)")
             }
         } else {
             avenues_print("Item already exists for \(key)")
         }
-    }
-    
-}
-
-public extension Avenue {
-    
-    static func ui<StorageType : StorageProtocol, FetcherType : FetcherProtocol>(storage: StorageType,
-                   fetcher: FetcherType,
-                   onError: @escaping (Error, Key) -> () = { _ in },
-                   onStateChange: @escaping (Key) -> ()) -> Avenue where StorageType.Key == Key, StorageType.Value == Value, FetcherType.Key == Key, FetcherType.Value == Value {
-        return Avenue(storage: Storage(storage),
-                      fetcher: Fetcher(fetcher),
-                      onError: { error, key in DispatchQueue.main.async { onError(error, key) } },
-                      onStateChange: { key in DispatchQueue.main.async { onStateChange(key) } })
-    }
-    
-    static func notOnMainQueue<StorageType : StorageProtocol, FetcherType : FetcherProtocol>(storage: StorageType,
-                               fetcher: FetcherType,
-                               onError: @escaping (Error, Key) -> () = { _ in },
-                               onStateChange: @escaping (Key) -> ()) -> Avenue where StorageType.Key == Key, StorageType.Value == Value, FetcherType.Key == Key, FetcherType.Value == Value {
-        return Avenue(storage: Storage(storage),
-                      fetcher: Fetcher(fetcher),
-                      onError: onError,
-                      onStateChange: onStateChange)
     }
     
 }

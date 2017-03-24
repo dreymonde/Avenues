@@ -32,6 +32,7 @@
 		7C4754F11E7D9DA900009209 /* Avenues+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754F01E7D9DA900009209 /* Avenues+UIKit.swift */; };
 		7C4754F21E7D9DAA00009209 /* Avenues+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754F01E7D9DA900009209 /* Avenues+UIKit.swift */; };
 		7C4754F31E7D9DAA00009209 /* Avenues+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754F01E7D9DA900009209 /* Avenues+UIKit.swift */; };
+		7C976ACB1E85A12100C9488F /* Avenues+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754F01E7D9DA900009209 /* Avenues+UIKit.swift */; };
 		DD7502861C68FDDC006590AF /* AvenuesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52D6D9971BEFF375002C0205 /* AvenuesTests.swift */; };
 		DD7502881C68FEDE006590AF /* Avenues.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D6DA0F1BF000BD002C0205 /* Avenues.framework */; };
 		DD7502921C690C7A006590AF /* Avenues.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D6D9F01BEFFFBE002C0205 /* Avenues.framework */; };
@@ -518,6 +519,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7C976ACB1E85A12100C9488F /* Avenues+UIKit.swift in Sources */,
 				52D6DA261BF00118002C0205 /* Avenues.swift in Sources */,
 				7C4754E91E7D921500009209 /* Lane.swift in Sources */,
 				7C4754DC1E7D79AE00009209 /* Synchronized.swift in Sources */,

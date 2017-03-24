@@ -1,42 +1,42 @@
-public enum FetcherResult<Value> {
+public enum ProcessorResult<Value> {
     case success(Value)
     case failure(Error)
 }
 
-public enum FetchingState {
+public enum ProcessingState {
     case none
     case running
     case completed
 }
 
-public typealias FetcherCompletion<T> = (FetcherResult<T>) -> ()
+public typealias ProcessorCompletion<T> = (ProcessorResult<T>) -> ()
 
-public protocol FetcherProtocol {
+public protocol ProcessorProtocol {
     
     associatedtype Key : Hashable
     associatedtype Value
     
-    func start(key: Key, completion: @escaping FetcherCompletion<Value>)
+    func start(key: Key, completion: @escaping ProcessorCompletion<Value>)
     func cancel(key: Key)
-    func fetchingState(key: Key) -> FetchingState
+    func processingState(key: Key) -> ProcessingState
     func cancelAll()
     
 }
 
-public extension FetcherProtocol {
+public extension ProcessorProtocol {
     
-    func mapKey<OtherKey>(_ transform: @escaping (OtherKey) -> Key) -> Fetcher<OtherKey, Value> {
-        let start: Fetcher<OtherKey, Value>.Start = { otherKey, completion in self.start(key: transform(otherKey), completion: completion) }
-        let cancel: Fetcher<OtherKey, Value>.Cancel = { otherKey in self.cancel(key: transform(otherKey)) }
-        let getStage: Fetcher<OtherKey, Value>.GetState = { otherKey in self.fetchingState(key: transform(otherKey)) }
-        return Fetcher(start: start,
+    func mapKey<OtherKey>(_ transform: @escaping (OtherKey) -> Key) -> Processor<OtherKey, Value> {
+        let start: Processor<OtherKey, Value>.Start = { otherKey, completion in self.start(key: transform(otherKey), completion: completion) }
+        let cancel: Processor<OtherKey, Value>.Cancel = { otherKey in self.cancel(key: transform(otherKey)) }
+        let getStage: Processor<OtherKey, Value>.GetState = { otherKey in self.processingState(key: transform(otherKey)) }
+        return Processor(start: start,
                        cancel: cancel,
                        getState: getStage,
                        cancelAll: cancelAll)
     }
     
-    func mapValue<OtherValue>(_ transform: @escaping (Value) throws -> OtherValue) -> Fetcher<Key, OtherValue> {
-        let start: Fetcher<Key, OtherValue>.Start = { key, completion in
+    func mapValue<OtherValue>(_ transform: @escaping (Value) throws -> OtherValue) -> Processor<Key, OtherValue> {
+        let start: Processor<Key, OtherValue>.Start = { key, completion in
             self.start(key: key, completion: { (result) in
                 switch result {
                 case .success(let value):
@@ -51,44 +51,44 @@ public extension FetcherProtocol {
                 }
             })
         }
-        return Fetcher(start: start,
+        return Processor(start: start,
                        cancel: self.cancel(key:),
-                       getState: self.fetchingState(key:),
+                       getState: self.processingState(key:),
                        cancelAll: cancelAll)
     }
     
 }
 
-public struct Fetcher<Key : Hashable, Value> : FetcherProtocol {
+public struct Processor<Key : Hashable, Value> : ProcessorProtocol {
     
-    public typealias Start = (Key, @escaping FetcherCompletion<Value>) -> ()
+    public typealias Start = (Key, @escaping ProcessorCompletion<Value>) -> ()
     public typealias Cancel = (Key) -> ()
-    public typealias GetState = (Key) -> FetchingState
+    public typealias GetState = (Key) -> ProcessingState
     public typealias CancelAll = () -> ()
     
-    let _start: Fetcher.Start
-    let _cancel: Fetcher.Cancel
-    let _getState: Fetcher.GetState
-    let _cancelAll: Fetcher.CancelAll
+    let _start: Processor.Start
+    let _cancel: Processor.Cancel
+    let _getState: Processor.GetState
+    let _cancelAll: Processor.CancelAll
     
-    public init(start: @escaping Fetcher.Start,
-                cancel: @escaping Fetcher.Cancel,
-                getState: @escaping Fetcher.GetState,
-                cancelAll: @escaping Fetcher.CancelAll) {
+    public init(start: @escaping Processor.Start,
+                cancel: @escaping Processor.Cancel,
+                getState: @escaping Processor.GetState,
+                cancelAll: @escaping Processor.CancelAll) {
         self._start = start
         self._cancel = cancel
         self._getState = getState
         self._cancelAll = cancelAll
     }
     
-    public init<FetcherType : FetcherProtocol>(_ fetcher: FetcherType) where FetcherType.Key == Key, FetcherType.Value == Value {
-        self._start = fetcher.start(key:completion:)
-        self._cancel = fetcher.cancel(key:)
-        self._getState = fetcher.fetchingState(key:)
-        self._cancelAll = fetcher.cancelAll
+    public init<ProcessorType : ProcessorProtocol>(_ processor: ProcessorType) where ProcessorType.Key == Key, ProcessorType.Value == Value {
+        self._start = processor.start(key:completion:)
+        self._cancel = processor.cancel(key:)
+        self._getState = processor.processingState(key:)
+        self._cancelAll = processor.cancelAll
     }
     
-    public func start(key: Key, completion: @escaping (FetcherResult<Value>) -> ()) {
+    public func start(key: Key, completion: @escaping (ProcessorResult<Value>) -> ()) {
         _start(key, completion)
     }
     
@@ -96,7 +96,7 @@ public struct Fetcher<Key : Hashable, Value> : FetcherProtocol {
         _cancel(key)
     }
     
-    public func fetchingState(key: Key) -> FetchingState {
+    public func processingState(key: Key) -> ProcessingState {
         return _getState(key)
     }
     

@@ -4,6 +4,7 @@ public enum ProcessorResult<Value> {
 }
 
 public enum ProcessingState {
+    case undefined
     case none
     case running
     case completed
@@ -33,6 +34,39 @@ public extension ProcessorProtocol {
                        cancel: cancel,
                        getState: getStage,
                        cancelAll: cancelAll)
+    }
+    
+    func mapKey<OtherKey>(_ transform: @escaping (OtherKey) -> Key?) -> Processor<OtherKey, Value> {
+        func logCannot(otherKey: OtherKey) {
+            avenues_print("Cannot convert \(otherKey) to \(Key.self)")
+        }
+        let start: Processor<OtherKey, Value>.Start = { otherKey, completion in
+            if let key = transform(otherKey) {
+                self.start(key: key, completion: completion)
+            } else {
+                logCannot(otherKey: otherKey)
+            }
+        }
+        let cancel: Processor<OtherKey, Value>.Cancel = { otherKey in
+            if let key = transform(otherKey) {
+                self.cancel(key: key)
+            } else {
+                logCannot(otherKey: otherKey)
+            }
+        }
+        let getStage: Processor<OtherKey, Value>.GetState = { otherKey in
+            if let key = transform(otherKey) {
+                return self.processingState(key: key)
+            } else {
+                logCannot(otherKey: otherKey)
+                return .undefined
+            }
+        }
+        return Processor(start: start,
+                         cancel: cancel,
+                         getState: getStage,
+                         cancelAll: cancelAll)
+
     }
     
     func mapValue<OtherValue>(_ transform: @escaping (Value) throws -> OtherValue) -> Processor<Key, OtherValue> {

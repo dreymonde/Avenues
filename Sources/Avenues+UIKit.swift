@@ -9,7 +9,7 @@
 
 //    public typealias UIImageAvenue = Avenue<IndexPath, UIImage>
     
-    public func UIImageAvenue(indexPathToURL: @escaping (IndexPath) -> URL) -> Avenue<IndexPath, UIImage> {
+    public func UIImageAvenue(indexPathToURL: @escaping (IndexPath) -> URL?) -> Avenue<IndexPath, UIImage> {
         let sessionLane: Processor<IndexPath, UIImage> = URLSessionProcessor()
             .mapKey(indexPathToURL)
             .mapImage()

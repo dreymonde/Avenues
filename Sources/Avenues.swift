@@ -93,29 +93,29 @@ public final class Avenue<Key : Hashable, Value> {
     }
     
     fileprivate func _prepareItem(at key: Key) {
-        if storage.value(for: key) == nil {
-            if processor.processingState(key: key) != .running {
-                processor.start(key: key, completion: { (result) in
-                    switch result {
-                    case .success(let value):
-                        avenues_print("Have an item at \(key), storing")
-                        self.storage.set(value, for: key)
-                        self.dispatchCallback {
-                            self.onStateChange(key)
-                        }
-                    case .failure(let error):
-                        avenues_print("Errored processing item at \(key), cancelling processing. Error: \(key)")
-                        self.processor.cancel(key: key)
-                        self.dispatchCallback {
-                            self.onError(error, key)
-                        }
-                    }
-                })
-            } else {
-                avenues_print("Processing is already in flight for \(key)")
-            }
-        } else {
+        guard storage.value(for: key) == nil else {
             avenues_print("Item already exists for \(key)")
+            return
+        }
+        guard processor.processingState(key: key) != .running else {
+            avenues_print("Processing is already in flight for \(key)")
+            return
+        }
+        processor.start(key: key) { (result) in
+            switch result {
+            case .success(let value):
+                avenues_print("Have an item at \(key), storing")
+                self.storage.set(value, for: key)
+                self.dispatchCallback {
+                    self.onStateChange(key)
+                }
+            case .failure(let error):
+                avenues_print("Errored processing item at \(key), cancelling processing. Error: \(key)")
+                self.processor.cancel(key: key)
+                self.dispatchCallback {
+                    self.onError(error, key)
+                }
+            }
         }
     }
     

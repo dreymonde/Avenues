@@ -55,14 +55,6 @@ public final class Avenue<Key : Hashable, Value> {
         self.onStateChange = { _ in avenues_print("No onStateChange") }
     }
     
-    private func dispatchCallback(callback: @escaping () -> ()) {
-        if let queue = callbackQueue {
-            queue.async { callback() }
-        } else {
-            callback()
-        }
-    }
-    
     deinit {
         avenues_print("Deinit \(self)")
     }
@@ -110,12 +102,20 @@ public final class Avenue<Key : Hashable, Value> {
                     self.onStateChange(key)
                 }
             case .failure(let error):
-                avenues_print("Errored processing item at \(key), cancelling processing. Error: \(key)")
+                avenues_print("Errored processing item at \(key), cancelling processing. Error: \(error)")
                 self.processor.cancel(key: key)
                 self.dispatchCallback {
                     self.onError(error, key)
                 }
             }
+        }
+    }
+    
+    private func dispatchCallback(callback: @escaping () -> ()) {
+        if let queue = callbackQueue {
+            queue.async { callback() }
+        } else {
+            callback()
         }
     }
     

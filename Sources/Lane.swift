@@ -86,9 +86,9 @@ public extension ProcessorProtocol {
             })
         }
         return Processor(start: start,
-                       cancel: self.cancel(key:),
-                       getState: self.processingState(key:),
-                       cancelAll: cancelAll)
+                         cancel: self.cancel(key:),
+                         getState: self.processingState(key:),
+                         cancelAll: self.cancelAll)
     }
     
 }

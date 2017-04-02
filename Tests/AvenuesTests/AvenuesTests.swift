@@ -36,13 +36,15 @@ class FakeProc<Key : Hashable> : Avenues.ProcessorProtocol {
     
 }
 
+extension String : Error { }
+
 class AvenuesTests: XCTestCase {
     
     override func setUp() {
         Avenues.Log.isEnabled = true
     }
     
-    func testStart() {
+    func testFetch() {
         let expectation = self.expectation(description: "Avenue")
         let storage = Storage<Int, String>.dictionaryBased()
         let avenue = Avenue<Int, String>(storage: storage,
@@ -57,7 +59,7 @@ class AvenuesTests: XCTestCase {
         waitForExpectations(timeout: 5.0)
     }
     
-    func testMainQueue() {
+    func testMainQueueStateChange() {
         let expectation = self.expectation(description: "Avenue main queue callback")
         let avenue = Avenue<Int, String>(storage: .dictionaryBased(),
                                          processor: FakeProc<Int>().processor(),
@@ -69,6 +71,26 @@ class AvenuesTests: XCTestCase {
         avenue.prepareItem(at: 2)
         waitForExpectations(timeout: 5.0)
     }
+    
+    func testMainQueueError() {
+        let expectation = self.expectation(description: "Avenue main queue callback")
+        let processor = Processor<Int, String>(start: { (number, callback) in
+            callback(.failure("Sorry, buddy"))
+        }, cancel: emptyFunc, getState: { _ in .undefined }, cancelAll: emptyFunc)
+        let avenue = Avenue<Int, String>(storage: .dictionaryBased(),
+                                         processor: processor,
+                                         callbackMode: .mainQueue)
+        avenue.onError = { _ in
+            XCTAssertTrue(Thread.isMainThread)
+            expectation.fulfill()
+        }
+        avenue.prepareItem(at: 2)
+        waitForExpectations(timeout: 5.0)
+    }
+    
+}
+
+func emptyFunc<Input>(_ input: Input) -> Void {
     
 }
 

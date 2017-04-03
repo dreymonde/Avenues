@@ -74,9 +74,9 @@ public final class Avenue<Key : Hashable, Value> {
         self.processor.cancelAll()
     }
     
-    public func prepareItem(at key: Key) {
+    public func prepareItem(at key: Key, force: Bool = false) {
         processingQueue.async {
-            self._prepareItem(at: key)
+            self._prepareItem(at: key, force: force)
         }
     }
     
@@ -84,8 +84,8 @@ public final class Avenue<Key : Hashable, Value> {
         return processor.processingState(key: key)
     }
     
-    fileprivate func _prepareItem(at key: Key) {
-        guard storage.value(for: key) == nil else {
+    fileprivate func _prepareItem(at key: Key, force: Bool) {
+        guard storage.value(for: key) == nil || force else {
             avenues_print("Item already exists for \(key)")
             return
         }

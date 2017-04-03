@@ -80,6 +80,10 @@ public final class Avenue<Key : Hashable, Value> {
         }
     }
     
+    internal func test_syncPrepareItem(at key: Key, force: Bool) {
+        self._prepareItem(at: key, force: force)
+    }
+    
     public func processingState(ofItemAt key: Key) -> ProcessingState {
         return processor.processingState(key: key)
     }

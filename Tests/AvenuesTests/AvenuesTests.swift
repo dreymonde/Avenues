@@ -8,7 +8,7 @@
 
 import Foundation
 import XCTest
-import Avenues
+@testable import Avenues
 
 class FakeProc<Key : Hashable> : Avenues.ProcessorProtocol {
     
@@ -85,6 +85,49 @@ class AvenuesTests: XCTestCase {
             expectation.fulfill()
         }
         avenue.prepareItem(at: 2)
+        waitForExpectations(timeout: 5.0)
+    }
+    
+    func testForce() {
+        var dict: [Int : String] = [5: "10"]
+        let storage = Storage<Int, String>(get: { dict[$0] }, set: { dict[$1] = $0 })
+        let expectation = self.expectation(description: "On start")
+        var force = false
+        let processor = Processor<Int, String>(start: { _ in force ? expectation.fulfill() : XCTFail() },
+                                  cancel: emptyFunc,
+                                  getState: { _ in return .undefined },
+                                  cancelAll: emptyFunc)
+        let avenue = Avenue(storage: storage,
+                            processor: processor,
+                            callbackMode: .privateQueue)
+        avenue.prepareItem(at: 5, force: false)
+        force = true
+        avenue.prepareItem(at: 5, force: true)
+        waitForExpectations(timeout: 5.0)
+    }
+    
+    func testInFlight() {
+        let proc = Processor<Int, String>(start: { _ in XCTFail() },
+                                          cancel: emptyFunc,
+                                          getState: { _ in return .running },
+                                          cancelAll: emptyFunc)
+        let avenue = Avenue(storage: .dictionaryBased(),
+                            processor: proc,
+                            callbackMode: .privateQueue)
+        XCTAssertEqual(avenue.processingState(ofItemAt: 5), .running)
+        avenue.test_syncPrepareItem(at: 5, force: false)
+    }
+    
+    func testCancel() {
+        let expectation = self.expectation(description: "On cancel")
+        let proc = Processor<Int, String>(start: emptyFunc,
+                                          cancel: { _ in expectation.fulfill() },
+                                          getState: { _ in .undefined },
+                                          cancelAll: emptyFunc)
+        let avenue = Avenue(storage: .dictionaryBased(),
+                            processor: proc,
+                            callbackMode: .privateQueue)
+        avenue.cancelProcessing(ofItemAt: 5)
         waitForExpectations(timeout: 5.0)
     }
     

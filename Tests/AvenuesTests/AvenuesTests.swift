@@ -90,7 +90,7 @@ class AvenuesTests: XCTestCase {
     
     func testForce() {
         var dict: [Int : String] = [5: "10"]
-        let storage = Storage<Int, String>(get: { dict[$0] }, set: { dict[$1] = $0 })
+        let storage = Storage<Int, String>(get: { dict[$0] }, set: { dict[$1] = $0 }, clear: { dict = [:] })
         let expectation = self.expectation(description: "On start")
         var force = false
         let processor = Processor<Int, String>(start: { _ in force ? expectation.fulfill() : XCTFail() },

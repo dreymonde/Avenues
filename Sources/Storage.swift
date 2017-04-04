@@ -102,7 +102,7 @@ public extension StorageProtocol {
     
     public class NSCacheStorage<Key : AnyObject, Value : AnyObject> : StorageProtocol where Key : Hashable {
         
-        public let cache: NSCache<Key, Value>
+        public var cache: NSCache<Key, Value>
         
         public init(cache: NSCache<Key, Value> = NSCache()) {
             self.cache = cache
@@ -121,7 +121,7 @@ public extension StorageProtocol {
         }
         
         public func clear() {
-            cache.removeAllObjects()
+            self.cache = NSCache()
         }
         
     }

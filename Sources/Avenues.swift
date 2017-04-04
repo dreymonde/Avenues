@@ -74,6 +74,10 @@ public final class Avenue<Key : Hashable, Value> {
         self.processor.cancelAll()
     }
     
+    public func clearStorage() {
+        self.storage.clear()
+    }
+    
     public func prepareItem(at key: Key, force: Bool = false) {
         processingQueue.async {
             self._prepareItem(at: key, force: force)

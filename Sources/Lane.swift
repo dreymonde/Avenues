@@ -146,7 +146,7 @@ public protocol AutoProcessorProtocol {
     associatedtype Value
     
     func start(key: Key, completion: @escaping ProcessorCompletion<Value>)
-    func cancel(key: Key)
+    func cancel(key: Key) -> Bool
     func cancelAll()
     
 }
@@ -185,8 +185,9 @@ public final class AutoProcessor<Proc : AutoProcessorProtocol> : ProcessorProtoc
     }
     
     public func cancel(key: Proc.Key) {
-        proc.cancel(key: key)
-        tasks.set({ (dict : inout [Key : ProcessingState]) in dict[key] = nil })
+        if proc.cancel(key: key) {
+            tasks.set({ (dict : inout [Key : ProcessingState]) in dict[key] = nil })
+        }
     }
     
     public func cancelAll() {

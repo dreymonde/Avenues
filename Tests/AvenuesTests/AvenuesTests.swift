@@ -131,6 +131,43 @@ class AvenuesTests: XCTestCase {
         waitForExpectations(timeout: 5.0)
     }
     
+    class AutoIntStr : AutoProcessorProtocol {
+        
+        typealias Key = Int
+        typealias Value = String
+        
+        func start(key: Int, completion: @escaping (ProcessorResult<String>) -> ()) {
+            DispatchQueue.global(qos: .background).async {
+                completion(.success(key.description))
+            }
+        }
+        
+        func cancel(key: Int) -> Bool {
+            return false
+        }
+        
+        func cancelAll() {
+            // not supported
+        }
+        
+    }
+    
+    func testAuto() {
+        let expectation = self.expectation(description: "On change")
+        let autoProc = AutoIntStr()
+        let storage = Storage<Int, String>.dictionaryBased()
+        let avenue = Avenue(storage: storage, processor: autoProc.processor())
+        avenue.onStateChange = { index in
+            let value = avenue.item(at: 5)
+            XCTAssertEqual(value, "5")
+            XCTAssertEqual(avenue.processingState(ofItemAt: 5), .completed)
+            expectation.fulfill()
+        }
+        XCTAssertEqual(avenue.processingState(ofItemAt: 5), .none)
+        avenue.prepareItem(at: 5)
+        waitForExpectations(timeout: 5.0)
+    }
+    
 }
 
 func emptyFunc<Input>(_ input: Input) -> Void {

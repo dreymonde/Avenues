@@ -47,7 +47,7 @@ class AvenuesTests: XCTestCase {
     func testFetch() {
         let expectation = self.expectation(description: "Avenue")
         let storage = Storage<Int, String>.dictionaryBased()
-        let avenue = Avenue<Int, String>(storage: storage,
+        let avenue = SymmetricalAvenue<Int, String>(storage: storage,
                                          processor: FakeProc<Int>().processor(),
                                          callbackMode: .privateQueue)
         avenue.onStateChange = { [unowned avenue] index in
@@ -61,7 +61,7 @@ class AvenuesTests: XCTestCase {
     
     func testMainQueueStateChange() {
         let expectation = self.expectation(description: "Avenue main queue callback")
-        let avenue = Avenue<Int, String>(storage: .dictionaryBased(),
+        let avenue = SymmetricalAvenue<Int, String>(storage: .dictionaryBased(),
                                          processor: FakeProc<Int>().processor(),
                                          callbackMode: .mainQueue)
         avenue.onStateChange = { _ in
@@ -77,7 +77,7 @@ class AvenuesTests: XCTestCase {
         let processor = Processor<Int, String>(start: { (number, callback) in
             callback(.failure("Sorry, buddy"))
         }, cancel: emptyFunc, getState: { _ in .undefined }, cancelAll: emptyFunc)
-        let avenue = Avenue<Int, String>(storage: .dictionaryBased(),
+        let avenue = SymmetricalAvenue<Int, String>(storage: .dictionaryBased(),
                                          processor: processor,
                                          callbackMode: .mainQueue)
         avenue.onError = { _ in
@@ -97,7 +97,7 @@ class AvenuesTests: XCTestCase {
                                   cancel: emptyFunc,
                                   getState: { _ in return .undefined },
                                   cancelAll: emptyFunc)
-        let avenue = Avenue(storage: storage,
+        let avenue = SymmetricalAvenue(storage: storage,
                             processor: processor,
                             callbackMode: .privateQueue)
         avenue.prepareItem(at: 5, force: false)
@@ -111,11 +111,11 @@ class AvenuesTests: XCTestCase {
                                           cancel: emptyFunc,
                                           getState: { _ in return .running },
                                           cancelAll: emptyFunc)
-        let avenue = Avenue(storage: .dictionaryBased(),
+        let avenue = SymmetricalAvenue(storage: .dictionaryBased(),
                             processor: proc,
                             callbackMode: .privateQueue)
         XCTAssertEqual(avenue.processingState(ofItemAt: 5), .running)
-        avenue.test_syncPrepareItem(at: 5, force: false)
+        avenue.test_syncPrepareItem(at: 5, storingTo: 5, force: false)
     }
     
     func testCancel() {
@@ -124,7 +124,7 @@ class AvenuesTests: XCTestCase {
                                           cancel: { _ in expectation.fulfill() },
                                           getState: { _ in .undefined },
                                           cancelAll: emptyFunc)
-        let avenue = Avenue(storage: .dictionaryBased(),
+        let avenue = SymmetricalAvenue(storage: .dictionaryBased(),
                             processor: proc,
                             callbackMode: .privateQueue)
         avenue.cancelProcessing(ofItemAt: 5)

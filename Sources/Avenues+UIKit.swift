@@ -9,13 +9,12 @@
 
 //    public typealias UIImageAvenue = Avenue<IndexPath, UIImage>
     
-    public func UIImageAvenue(indexPathToURL: @escaping (IndexPath) -> URL?) -> Avenue<IndexPath, UIImage> {
-        let sessionLane: Processor<IndexPath, UIImage> = URLSessionProcessor()
-            .mapKey(indexPathToURL)
+    public func UIImageAvenue() -> Avenue<IndexPath, URL, UIImage> {
+        let sessionLane: Processor<URL, UIImage> = URLSessionProcessor()
             .mapImage()
         let storage: Storage<IndexPath, UIImage> = NSCacheStorage<NSIndexPath, UIImage>()
             .mapKey({ $0 as NSIndexPath })
-        return Avenue<IndexPath, UIImage>(storage: storage,
+        return Avenue<IndexPath, URL, UIImage>(storage: storage,
                                           processor: sessionLane,
                                           callbackMode: .mainQueue)
     }

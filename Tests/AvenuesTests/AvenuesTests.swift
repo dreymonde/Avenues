@@ -90,7 +90,7 @@ class AvenuesTests: XCTestCase {
     
     func testForce() {
         var dict: [Int : String] = [5: "10"]
-        let storage = Storage<Int, String>(get: { dict[$0] }, set: { dict[$1] = $0 }, clear: { dict = [:] })
+        let storage = Storage<Int, String>(get: { dict[$0] }, set: { dict[$1] = $0 })
         let expectation = self.expectation(description: "On start")
         var force = false
         let processor = Processor<Int, String>(start: { _ in force ? expectation.fulfill() : XCTFail() },
@@ -114,8 +114,8 @@ class AvenuesTests: XCTestCase {
         let avenue = SymmetricalAvenue(storage: .dictionaryBased(),
                             processor: proc,
                             callbackMode: .privateQueue)
-        XCTAssertEqual(avenue.processingState(ofItemAt: 5), .running)
-        avenue.test_syncPrepareItem(at: 5, storingTo: 5, force: false)
+        XCTAssertEqual(avenue.processingState(of: 5), .running)
+        avenue.test_syncPrepareItem(for: 5, storingTo: 5, force: false)
     }
     
     func testCancel() {
@@ -127,7 +127,7 @@ class AvenuesTests: XCTestCase {
         let avenue = SymmetricalAvenue(storage: .dictionaryBased(),
                             processor: proc,
                             callbackMode: .privateQueue)
-        avenue.cancelProcessing(ofItemAt: 5)
+        avenue.cancelProcessing(of: 5)
         waitForExpectations(timeout: 5.0)
     }
     
@@ -160,10 +160,10 @@ class AvenuesTests: XCTestCase {
         avenue.onStateChange = { index in
             let value = avenue.item(at: 5)
             XCTAssertEqual(value, "5")
-            XCTAssertEqual(avenue.processingState(ofItemAt: 5), .completed)
+            XCTAssertEqual(avenue.processingState(of: 5), .completed)
             expectation.fulfill()
         }
-        XCTAssertEqual(avenue.processingState(ofItemAt: 5), .none)
+        XCTAssertEqual(avenue.processingState(of: 5), .none)
         avenue.prepareItem(at: 5)
         waitForExpectations(timeout: 5.0)
     }

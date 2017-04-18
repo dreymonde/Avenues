@@ -1,17 +1,17 @@
 # Avenues
 
-**Avenues** is a new approach to the old and famous problem -- asynchronous loading of a resource, the most common example of which is populating an image from a remote location. The main advantage of **Avenues** is that it makes the whole process much more transparent and controllable.
+**Avenues** is a new approach to the old and famous problem – asynchronous loading of a resource, the most common example of which is populating an image from a remote location. The main advantage of **Avenues** is that it makes the whole process much more transparent and controllable.
 
 In contrast to other libraries which solves the same problem, **Avenues** doesn't sacrifice "right" for "neat". Instead, **Avenues** is highly customizable, unopiniated about your business-logic, and very transparent. You can use it as a simple out-of-the-box solution, or you can get your hands dirty and customize it to fully fit your needs.
 
-After all, **Avenues** is a really small, component-based project, so if you need even more controllable solution -- build one yourself! Our source code is there to help.
+After all, **Avenues** is a really small, component-based project, so if you need even more controllable solution – build one yourself! Our source code is there to help.
 
 ## Features
 - Asynchronous loading/processing of items.
-- Generic approach -- **Avenues** can be used not just for images.
+- Generic approach – **Avenues** can be used not just for images.
 - `NSCache`-based memory caching.
 - Designed to work with `UITableView`/`UICollectionView` in an elegant, idiomatic way.
-- Highly customizable -- you can provide your own storage and fetching mechanisms.
+- Highly customizable – you can provide your own storage and fetching mechanisms.
 - Not firing multiple requests for the same item.
 - Clear and transparent design with *no magic at all*.
 
@@ -30,11 +30,10 @@ struct Entry {
 class ExampleTableViewController: UITableViewController {
     
     var entries: [Entry] = []
-    var avenue: Avenue<IndexPath, UIImage>!
+    let avenue = UIImageAvenue()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.avenue = UIImageAvenue(indexPathToURL: { [weak self] in self?.entries[$0.row].imageURL })
         avenue.onStateChange = { [weak self] indexPath in
             if let cell = self?.tableView.cellForRow(at: indexPath) {
                 self?.configureCell(cell, forRowAt: indexPath)
@@ -61,15 +60,16 @@ class ExampleTableViewController: UITableViewController {
     
     func configureCell(_ cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         let entry = entries[indexPath.row]
+        if let imageURL = entry.imageURL {
+            avenue.prepareItem(for: imageURL, storingTo: indexPath)
+        }
         cell.textLabel?.text = entry.text
-        let image: UIImage? = avenue.item(at: indexPath)
-        cell.imageView?.image = image
+        cell.imageView?.image = avenue.item(at: indexPath)
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: <#identifier#>, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
         configureCell(cell, forRowAt: indexPath)
-        avenue.prepareItem(at: indexPath)
         return cell
     }
     
@@ -77,25 +77,24 @@ class ExampleTableViewController: UITableViewController {
 
 ```
 
-`UIImageAvenue` is a helper function that provides default `NSCache`-based storage and `URLSession`-based downloader. You can achieve the same behavior using this code:
+`UIImageAvenue` is a helper function that creates a basic instance of type `Avenue<IndexPath, URL, UIImage>` with `NSCache`-based storage and `URLSession`-based downloader. You can achieve the same behavior using this code:
 
 ```swift
 let cache = NSCache<NSIndexPath, UIImage>()
 let storage: Storage<IndexPath, UIImage> = NSCacheStorage(cache: cache)
     .mapKey({ indexPath in indexPath as NSIndexPath })
 let session = URLSession(configuration: .default)
-let downloader: Processor<IndexPath, UIImage> = URLSessionProcessor(session: session)
-    .mapKey({ [unowned self] in self.entries[$0.row].imageURL })
+let downloader: Processor<URL, UIImage> = URLSessionProcessor(session: session)
     .mapImage()
-self.avenue = Avenue(storage: storage,
-                     processor: downloader,
-                     callbackMode: .mainQueue)
+let avenue = Avenue(storage: storage,
+                    processor: downloader,
+                    callbackMode: .mainQueue)
 ```
 
-**Avenues** provides `URLSessionProcessor` and `NSCacheStorage` + `Storage.dictionaryBased` out of the box.
+**Avenues** provides `URLSessionProcessor`, `NSCacheStorage` and `Storage.dictionaryBased` out of the box.
 
 ### Writing your own processor
-**Avenues** is not limited for networking. Any situation that requires asynchronous job will benefit from it. **Avenues** provides basic `URLSessionProcessor`, but you can write your own -- for networking or for anything else. Let's imagine that we want to write a processor that does some heavy background job and then produces a `UIImage` object. Here is one way to do it:
+**Avenues** is not limited for networking. Any situation that requires asynchronous job will benefit from it. **Avenues** provides basic `URLSessionProcessor`, but you can write your own – for networking or for anything else. Let's imagine that we want to write a processor that does some heavy background job and then produces a `UIImage` object. Here is one way to do it:
 
 ```swift
 final class ChartDrawer : ProcessorProtocol {
@@ -158,12 +157,56 @@ And here's how to create our regular `Avenue<IndexPath, UIImage>` from it:
 
 ```swift
 let storage = Storage<IndexPath, UIImage>.dictionaryBased()
-let drawer: Processor<IndexPath, UIImage> = ChartDrawer().mapKey({ [unowned self] in self.charts[$0.row] })
-self.avenue = Avenue(storage: storage,
-                     processor: drawer,
-                     callbackMode: .mainQueue)
+let drawer = Processor(ChartDrawer())
+let avenue = Avenue(storage: storage,
+                    processor: drawer,
+                    callbackMode: .mainQueue)
+```
+
+You may have noticed that there are a lot of tricky state handling going on in `ChartDrawer`, like having this `jobs` dictionary (which should be thread-safe). If you don't want to deal with all that stuff, you can simply conform to `AutoProcessorProtocol` instead of `ProcessorProtocol`:
+
+```swift
+final class AutoChartDrawer : AutoProcessorProtocol {
+    
+    typealias Key = ChartData
+    typealias Value = UIImage
+    
+    func produceImage(from data: ChartData) -> UIImage {
+        /// ... some heavy job
+        return UIImage()
+    }
+    
+    func start(key data: ChartData, completion: @escaping (ProcessorResult<UIImage>) -> ()) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let image = self.produceImage(from: data)
+            completion(.success(image))
+        }
+    }
+    
+    func cancel(key: ChartData) -> Bool {
+        // not supported
+        return false
+    }
+    
+    func cancelAll() {
+        // not supported
+    }
+    
+}
+```
+
+And then create your avenue like this:
+
+```swift
+let storage = Storage<IndexPath, UIImage>.dictionaryBased()
+let drawer = AutoChartDrawer().processor()
+let avenue = Avenue(storage: storage,
+                    processor: drawer,
+                    callbackMode: .mainQueue)
 
 ```
+
+`AutoProcessor` will handle all that state management for you.
 
 ### Using Avenues with `UITableViewDataSourcePrefetching`
 
@@ -174,17 +217,21 @@ tableView.prefetchDataSource = self
 Then:
 
 ```swift
-extension AvenueTableViewController : UITableViewDataSourcePrefetching {
+extension ExampleTableViewController : UITableViewDataSourcePrefetching {
     
     func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
         for indexPath in indexPaths {
-            avenue.prepareItem(at: indexPath)
+            if let imageURL = entries[indexPath.row].imageURL {
+                avenue.prepareItem(for: imageURL, storingTo: indexPath)
+            }
         }
     }
-
+    
     func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {
         for indexPath in indexPaths {
-            avenue.cancelProcessing(ofItemAt: indexPath)
+            if let imageURL = entries[indexPath.row].imageURL {
+                avenue.cancelProcessing(of: imageURL)
+            }
         }
     }
     

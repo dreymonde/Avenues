@@ -87,7 +87,7 @@ public extension StorageProtocol {
 
 #if os(iOS) || os(OSX) || os(watchOS) || os(tvOS)
     
-    public class NSCacheStorage<Key : AnyObject, Value : AnyObject> : StorageProtocol where Key : Hashable {
+    public final class NSCacheStorage<Key : AnyObject, Value : AnyObject> : StorageProtocol where Key : Hashable {
         
         public var cache: NSCache<Key, Value>
         
@@ -112,7 +112,11 @@ public extension StorageProtocol {
         }
         
     }
-
+    
+    public func NSCacheStorageBoxedKey<Key : Hashable, Value : AnyObject>() -> Storage<Key, Value> {
+        return NSCacheStorage<NSCacheKeyBox<Key>, Value>().mapKey(NSCacheKeyBox.init)
+    }
+    
     extension Storage {
         
         public func synchronized() -> Storage {
@@ -129,6 +133,27 @@ public extension StorageProtocol {
             return Storage(get: threadSafeGet,
                            set: threadSafeSet,
                            remove: threadSafeRemove)
+        }
+        
+    }
+    
+    internal final class NSCacheKeyBox<Value : Hashable> : NSObject {
+        
+        internal let boxed: Value
+        
+        internal init(_ value: Value) {
+            self.boxed = value
+        }
+        
+        internal override func isEqual(_ object: Any?) -> Bool {
+            guard let other = object as? NSCacheKeyBox<Value> else {
+                return false
+            }
+            return self.boxed == other.boxed
+        }
+        
+        internal override var hash: Int {
+            return boxed.hashValue
         }
         
     }

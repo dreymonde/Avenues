@@ -165,7 +165,16 @@ class AvenuesTests: XCTestCase {
         }
         XCTAssertEqual(avenue.processingState(of: 5), .none)
         avenue.prepareItem(at: 5)
-        waitForExpectations(timeout: 5.0)
+        waitForExpectations(timeout: 5.0)        
+    }
+    
+    func testNSCacheBoxedKey() {
+        let storage: Storage<Int, NSString> = NSCacheStorageBoxedKey()
+        storage.set("SOME", for: 5)
+        let back = storage.value(for: 5)!
+        XCTAssertEqual(back, "SOME")
+        storage.remove(valueAt: 5)
+        XCTAssertNil(storage.value(for: 5))
     }
     
 }

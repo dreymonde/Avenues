@@ -82,12 +82,6 @@ public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value
         }
     }
     
-    internal func test_syncPrepareItem(for key: ProcessingKey,
-                                       storingTo storingKey: StoringKey,
-                                       force: Bool) {
-        self._prepareItem(for: key, storingTo: storingKey, force: force)
-    }
-    
     public func processingState(of key: ProcessingKey) -> ProcessingState {
         return processor.processingState(key: key)
     }
@@ -140,3 +134,13 @@ extension Avenue where StoringKey == ProcessingKey {
 }
 
 public typealias SymmetricalAvenue<Key : Hashable, Value> = Avenue<Key, Key, Value>
+
+extension Avenue {
+    
+    internal func test_syncPrepareItem(for key: ProcessingKey,
+                                       storingTo storingKey: StoringKey,
+                                       force: Bool) {
+        self._prepareItem(for: key, storingTo: storingKey, force: force)
+    }
+    
+}

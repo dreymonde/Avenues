@@ -34,7 +34,7 @@ class ExampleTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.avenue = UIImageAvenue(indexPathToURL: { [unowned self] in self.entries[$0.row].imageURL })
+        self.avenue = UIImageAvenue(indexPathToURL: { [weak self] in self?.entries[$0.row].imageURL })
         avenue.onStateChange = { [weak self] indexPath in
             if let cell = self?.tableView.cellForRow(at: indexPath) {
                 self?.configureCell(cell, forRowAt: indexPath)

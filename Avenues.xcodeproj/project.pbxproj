@@ -13,6 +13,10 @@
 		52D6D9EA1BEFFFA4002C0205 /* Avenues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52D6D9961BEFF375002C0205 /* Avenues.swift */; };
 		52D6DA091BF00081002C0205 /* Avenues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52D6D9961BEFF375002C0205 /* Avenues.swift */; };
 		52D6DA261BF00118002C0205 /* Avenues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52D6D9961BEFF375002C0205 /* Avenues.swift */; };
+		7C14D1E91EA6121300A76021 /* AutoProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C14D1E81EA6121300A76021 /* AutoProcessor.swift */; };
+		7C14D1EA1EA6121300A76021 /* AutoProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C14D1E81EA6121300A76021 /* AutoProcessor.swift */; };
+		7C14D1EB1EA6121300A76021 /* AutoProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C14D1E81EA6121300A76021 /* AutoProcessor.swift */; };
+		7C14D1EC1EA6121300A76021 /* AutoProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C14D1E81EA6121300A76021 /* AutoProcessor.swift */; };
 		7C4754DB1E7D79AE00009209 /* Synchronized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754CE1E7D79AE00009209 /* Synchronized.swift */; };
 		7C4754DC1E7D79AE00009209 /* Synchronized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754CE1E7D79AE00009209 /* Synchronized.swift */; };
 		7C4754DD1E7D79AE00009209 /* Synchronized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4754CE1E7D79AE00009209 /* Synchronized.swift */; };
@@ -71,6 +75,7 @@
 		52D6D9E21BEFFF6E002C0205 /* Avenues.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Avenues.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52D6D9F01BEFFFBE002C0205 /* Avenues.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Avenues.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52D6DA0F1BF000BD002C0205 /* Avenues.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Avenues.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7C14D1E81EA6121300A76021 /* AutoProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AutoProcessor.swift; path = Sources/AutoProcessor.swift; sourceTree = "<group>"; };
 		7C4754CE1E7D79AE00009209 /* Synchronized.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Synchronized.swift; path = Sources/Synchronized.swift; sourceTree = "<group>"; };
 		7C4754E01E7D7E2C00009209 /* URLSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = URLSession.swift; path = Sources/URLSession.swift; sourceTree = "<group>"; };
 		7C4754E61E7D921500009209 /* Lane.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Lane.swift; path = Sources/Lane.swift; sourceTree = "<group>"; };
@@ -143,6 +148,7 @@
 			children = (
 				7C4754CE1E7D79AE00009209 /* Synchronized.swift */,
 				7C4754E61E7D921500009209 /* Lane.swift */,
+				7C14D1E81EA6121300A76021 /* AutoProcessor.swift */,
 				7C4754E71E7D921500009209 /* Storage.swift */,
 				52D6D9961BEFF375002C0205 /* Avenues.swift */,
 				7C4754E01E7D7E2C00009209 /* URLSession.swift */,
@@ -474,6 +480,7 @@
 			files = (
 				7C4754F11E7D9DA900009209 /* Avenues+UIKit.swift in Sources */,
 				52D6D9981BEFF375002C0205 /* Avenues.swift in Sources */,
+				7C14D1E91EA6121300A76021 /* AutoProcessor.swift in Sources */,
 				7C4754E81E7D921500009209 /* Lane.swift in Sources */,
 				7C4754DB1E7D79AE00009209 /* Synchronized.swift in Sources */,
 				7C4754E11E7D7E2C00009209 /* URLSession.swift in Sources */,
@@ -495,6 +502,7 @@
 			files = (
 				7C4754F21E7D9DAA00009209 /* Avenues+UIKit.swift in Sources */,
 				52D6D9EA1BEFFFA4002C0205 /* Avenues.swift in Sources */,
+				7C14D1EB1EA6121300A76021 /* AutoProcessor.swift in Sources */,
 				7C4754EA1E7D921500009209 /* Lane.swift in Sources */,
 				7C4754DD1E7D79AE00009209 /* Synchronized.swift in Sources */,
 				7C4754E31E7D7E2C00009209 /* URLSession.swift in Sources */,
@@ -508,6 +516,7 @@
 			files = (
 				7C4754F31E7D9DAA00009209 /* Avenues+UIKit.swift in Sources */,
 				52D6DA091BF00081002C0205 /* Avenues.swift in Sources */,
+				7C14D1EC1EA6121300A76021 /* AutoProcessor.swift in Sources */,
 				7C4754EB1E7D921500009209 /* Lane.swift in Sources */,
 				7C4754DE1E7D79AE00009209 /* Synchronized.swift in Sources */,
 				7C4754E41E7D7E2C00009209 /* URLSession.swift in Sources */,
@@ -521,6 +530,7 @@
 			files = (
 				7C976ACB1E85A12100C9488F /* Avenues+UIKit.swift in Sources */,
 				52D6DA261BF00118002C0205 /* Avenues.swift in Sources */,
+				7C14D1EA1EA6121300A76021 /* AutoProcessor.swift in Sources */,
 				7C4754E91E7D921500009209 /* Lane.swift in Sources */,
 				7C4754DC1E7D79AE00009209 /* Synchronized.swift in Sources */,
 				7C4754E21E7D7E2C00009209 /* URLSession.swift in Sources */,

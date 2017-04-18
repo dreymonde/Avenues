@@ -90,7 +90,7 @@ class AvenuesTests: XCTestCase {
     
     func testForce() {
         var dict: [Int : String] = [5: "10"]
-        let storage = Storage<Int, String>(get: { dict[$0] }, set: { dict[$1] = $0 })
+        let storage = Storage<Int, String>(get: { dict[$0] }, set: { dict[$1] = $0 }, clear: { dict = [:] })
         let expectation = self.expectation(description: "On start")
         var force = false
         let processor = Processor<Int, String>(start: { _ in force ? expectation.fulfill() : XCTFail() },
@@ -128,6 +128,43 @@ class AvenuesTests: XCTestCase {
                             processor: proc,
                             callbackMode: .privateQueue)
         avenue.cancelProcessing(ofItemAt: 5)
+        waitForExpectations(timeout: 5.0)
+    }
+    
+    class AutoIntStr : AutoProcessorProtocol {
+        
+        typealias Key = Int
+        typealias Value = String
+        
+        func start(key: Int, completion: @escaping (ProcessorResult<String>) -> ()) {
+            DispatchQueue.global(qos: .background).async {
+                completion(.success(key.description))
+            }
+        }
+        
+        func cancel(key: Int) -> Bool {
+            return false
+        }
+        
+        func cancelAll() {
+            // not supported
+        }
+        
+    }
+    
+    func testAuto() {
+        let expectation = self.expectation(description: "On change")
+        let autoProc = AutoIntStr()
+        let storage = Storage<Int, String>.dictionaryBased()
+        let avenue = Avenue(storage: storage, processor: autoProc.processor())
+        avenue.onStateChange = { index in
+            let value = avenue.item(at: 5)
+            XCTAssertEqual(value, "5")
+            XCTAssertEqual(avenue.processingState(ofItemAt: 5), .completed)
+            expectation.fulfill()
+        }
+        XCTAssertEqual(avenue.processingState(ofItemAt: 5), .none)
+        avenue.prepareItem(at: 5)
         waitForExpectations(timeout: 5.0)
     }
     

@@ -1,5 +1,8 @@
 # Avenues
 
+[![Swift][swift-badge]][swift-url]
+[![Platform][platform-badge]][platform-url]
+
 **Avenues** is a new approach to the old and famous problem – asynchronous loading of a resource, the most common example of which is populating an image from a remote location. The main advantage of **Avenues** is that it makes the whole process much more transparent and controllable.
 
 In contrast to other libraries which solves the same problem, **Avenues** doesn't sacrifice "right" for "neat". Instead, **Avenues** is highly customizable, unopiniated about your business-logic, and very transparent. You can use it as a simple out-of-the-box solution, or you can get your hands dirty and customize it to fully fit your needs.
@@ -239,3 +242,16 @@ extension ExampleTableViewController : UITableViewDataSourcePrefetching {
 ```
 
 Works the same way with `UICollectionView`.
+
+## Installation
+**Avenues** is available through [Carthage][carthage-url]. To install, just write into your Cartfile:
+
+```ruby
+github "dreymonde/Avenues" ~> 0.1.0
+```
+
+[carthage-url]: https://github.com/Carthage/Carthage
+[swift-badge]: https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat
+[swift-url]: https://swift.org
+[platform-badge]: https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-lightgrey.svg
+[platform-url]: https://developer.apple.com/swift/

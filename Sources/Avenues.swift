@@ -43,7 +43,7 @@ public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value
     fileprivate let processor: Processor<ProcessingKey, Value>
     
     fileprivate let callbackQueue: DispatchQueue?
-    fileprivate let processingQueue = DispatchQueue(label: "AvenueQueue", qos: DispatchQoS.userInitiated)
+    fileprivate let processingQueue = DispatchQueue(label: "AvenueQueue", qos: .userInitiated)
     
     public init(storage: Storage<StoringKey, Value>,
                 processor: Processor<ProcessingKey, Value>,
@@ -63,7 +63,7 @@ public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value
         return storage.value(for: key)
     }
     
-    public func cancelProcessing(ofItemAt key: ProcessingKey) {
+    public func cancelProcessing(of key: ProcessingKey) {
         avenues_print("Cancelling download at \(key)")
         processingQueue.async {
             self.processor.cancel(key: key)
@@ -74,29 +74,29 @@ public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value
         self.processor.cancelAll()
     }
     
-    public func prepareItem(at key: ProcessingKey,
+    public func prepareItem(for key: ProcessingKey,
                             storingTo storingKey: StoringKey,
                             force: Bool = false) {
         processingQueue.async {
-            self._prepareItem(at: key, storingTo: storingKey, force: force)
+            self._prepareItem(for: key, storingTo: storingKey, force: force)
         }
     }
     
-    internal func test_syncPrepareItem(at key: ProcessingKey,
+    internal func test_syncPrepareItem(for key: ProcessingKey,
                                        storingTo storingKey: StoringKey,
                                        force: Bool) {
-        self._prepareItem(at: key, storingTo: storingKey, force: force)
+        self._prepareItem(for: key, storingTo: storingKey, force: force)
     }
     
-    public func processingState(ofItemAt key: ProcessingKey) -> ProcessingState {
+    public func processingState(of key: ProcessingKey) -> ProcessingState {
         return processor.processingState(key: key)
     }
     
-    fileprivate func _prepareItem(at key: ProcessingKey,
+    fileprivate func _prepareItem(for key: ProcessingKey,
                                   storingTo storingKey: StoringKey,
                                   force: Bool) {
         guard storage.value(for: storingKey) == nil || force else {
-            avenues_print("Item already exists for \(key)")
+            avenues_print("Item already exists for \(storingKey)")
             return
         }
         guard processor.processingState(key: key) != .running else {
@@ -134,7 +134,7 @@ public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value
 extension Avenue where StoringKey == ProcessingKey {
     
     public func prepareItem(at key: StoringKey, force: Bool = false) {
-        prepareItem(at: key, storingTo: key, force: force)
+        prepareItem(for: key, storingTo: key, force: force)
     }
     
 }

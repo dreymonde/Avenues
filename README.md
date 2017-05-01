@@ -243,6 +243,9 @@ extension ExampleTableViewController : UITableViewDataSourcePrefetching {
 
 Works the same way with `UICollectionView`.
 
+### Caching fetched items on disk
+**Avenues** doesn't support disk caching out of the box. If you want that , you should use **Avenues** in combination with [Shallows][shallows-github-url], which is a dedicated caching solution. For more info on that, check out the [Avenues+Shallows][avenues-shallows-github-url] repo.
+
 ## Installation
 **Avenues** is available through [Carthage][carthage-url]. To install, just write into your Cartfile:
 
@@ -255,3 +258,5 @@ github "dreymonde/Avenues" ~> 0.1.0
 [swift-url]: https://swift.org
 [platform-badge]: https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-lightgrey.svg
 [platform-url]: https://developer.apple.com/swift/
+[shallows-github-url]: https://github.com/dreymonde/Shallows
+[avenues-shallows-github-url]: https://github.com/dreymonde/Avenues-Shallows

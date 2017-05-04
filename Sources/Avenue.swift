@@ -34,13 +34,6 @@ public enum AvenueCallbackDispatchMode {
     }
 }
 
-public struct AvenueActivityObserver {
-    
-    var onStart: () -> () = { }
-    var onEnd: () -> () = { }
-    
-}
-
 public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value> {
     
     public var onStateChange: (StoringKey) -> ()
@@ -51,8 +44,6 @@ public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value
     
     fileprivate let callbackQueue: DispatchQueue?
     fileprivate let processingQueue = DispatchQueue(label: "AvenueQueue", qos: .userInitiated)
-    
-    public var activityObserver = AvenueActivityObserver()
     
     public init(storage: Storage<StoringKey, Value>,
                 processor: Processor<ProcessingKey, Value>,
@@ -107,7 +98,6 @@ public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value
             return
         }
         processor.start(key: key) { (result) in
-            self.activityObserver.onEnd()
             switch result {
             case .success(let value):
                 avenues_print("Have an item at \(storingKey), storing")
@@ -123,7 +113,6 @@ public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value
                 }
             }
         }
-        activityObserver.onStart()
     }
     
     private func dispatchCallback(callback: @escaping () -> ()) {

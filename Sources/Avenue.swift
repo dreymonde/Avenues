@@ -39,8 +39,8 @@ public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value
     public var onStateChange: (StoringKey) -> ()
     public var onError: (Error, StoringKey) -> ()
     
-    fileprivate let storage: Storage<StoringKey, Value>
-    fileprivate let processor: Processor<ProcessingKey, Value>
+    public let storage: Storage<StoringKey, Value>
+    public let processor: Processor<ProcessingKey, Value>
     
     fileprivate let callbackQueue: DispatchQueue?
     fileprivate let processingQueue = DispatchQueue(label: "AvenueQueue", qos: .userInitiated)

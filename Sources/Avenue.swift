@@ -34,10 +34,15 @@ public enum AvenueCallbackDispatchMode {
     }
 }
 
-public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value> {
+public class ProtoAvenue<StoringKey : Hashable, ProcessingKey : Hashable, Value> {
     
-    public var onStateChange: (StoringKey) -> ()
-    public var onError: (Error, StoringKey) -> ()
+    internal func didChangeState(forKey key: StoringKey) {
+        // override
+    }
+    
+    internal func didFail(with error: Error, key: StoringKey) {
+        // override
+    }
     
     public let storage: Storage<StoringKey, Value>
     public let processor: Processor<ProcessingKey, Value>
@@ -51,8 +56,6 @@ public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value
         self.storage = storage
         self.processor = processor
         self.callbackQueue = callbackMode.queue
-        self.onError = { _ in avenues_print("No onError") }
-        self.onStateChange = { _ in avenues_print("No onStateChange") }
     }
     
     deinit {
@@ -103,13 +106,13 @@ public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value
                 avenues_print("Have an item at \(storingKey), storing")
                 self.storage.set(value, for: storingKey)
                 self.dispatchCallback {
-                    self.onStateChange(storingKey)
+                    self.didChangeState(forKey: storingKey)
                 }
             case .failure(let error):
                 avenues_print("Errored processing item at \(storingKey), cancelling processing. Error: \(error)")
                 self.processor.cancel(key: key)
                 self.dispatchCallback {
-                    self.onError(error, storingKey)
+                    self.didFail(with: error, key: storingKey)
                 }
             }
         }
@@ -125,17 +128,40 @@ public final class Avenue<StoringKey : Hashable, ProcessingKey : Hashable, Value
     
 }
 
-extension Avenue where StoringKey == ProcessingKey {
+public class CallbackBasedAvenue<StoringKey : Hashable, ProcessingKey : Hashable, Value> : ProtoAvenue<StoringKey, ProcessingKey, Value> {
     
-    public func prepareItem(at key: StoringKey, force: Bool = false) {
+    public var onStateChange: (StoringKey) -> () = { _ in avenues_print("No onStateChange") }
+    public var onError: (Error, StoringKey) -> () = { _ in avenues_print("No onError") }
+    
+    internal final override func didChangeState(forKey key: StoringKey) {
+        onStateChange(key)
+    }
+    
+    internal final override func didFail(with error: Error, key: StoringKey) {
+        onError(error, key)
+    }
+    
+}
+
+public final class Avenue<Key : Hashable, Value> : CallbackBasedAvenue<Key, Key, Value> {
+    
+    
+    
+}
+
+public final class AsymmetricalAvenue<StoringKey : Hashable, ProcessingKey : Hashable, Value> : CallbackBasedAvenue<StoringKey, ProcessingKey, Value> {
+    
+}
+
+extension ProtoAvenue where StoringKey == ProcessingKey {
+    
+    public func prepareItem(for key: StoringKey, force: Bool = false) {
         prepareItem(for: key, storingTo: key, force: force)
     }
     
 }
 
-public typealias SymmetricalAvenue<Key : Hashable, Value> = Avenue<Key, Key, Value>
-
-extension Avenue {
+extension ProtoAvenue {
     
     internal func test_syncPrepareItem(for key: ProcessingKey,
                                        storingTo storingKey: StoringKey,

@@ -47,7 +47,7 @@ class AvenuesTests: XCTestCase {
     func testFetch() {
         let expectation = self.expectation(description: "Avenue")
         let storage = Storage<Int, String>.dictionaryBased()
-        let avenue = SymmetricalAvenue<Int, String>(storage: storage,
+        let avenue = Avenue<Int, String>(storage: storage,
                                          processor: FakeProc<Int>().processor(),
                                          callbackMode: .privateQueue)
         avenue.onStateChange = { [unowned avenue] index in
@@ -55,20 +55,20 @@ class AvenuesTests: XCTestCase {
             XCTAssertEqual(item, "Got that")
             expectation.fulfill()
         }
-        avenue.prepareItem(at: 1)
+        avenue.prepareItem(for: 1)
         waitForExpectations(timeout: 5.0)
     }
     
     func testMainQueueStateChange() {
         let expectation = self.expectation(description: "Avenue main queue callback")
-        let avenue = SymmetricalAvenue<Int, String>(storage: .dictionaryBased(),
+        let avenue = Avenue<Int, String>(storage: .dictionaryBased(),
                                          processor: FakeProc<Int>().processor(),
                                          callbackMode: .mainQueue)
         avenue.onStateChange = { _ in
             XCTAssertTrue(Thread.isMainThread)
             expectation.fulfill()
         }
-        avenue.prepareItem(at: 2)
+        avenue.prepareItem(for: 2)
         waitForExpectations(timeout: 5.0)
     }
     
@@ -77,14 +77,14 @@ class AvenuesTests: XCTestCase {
         let processor = Processor<Int, String>(start: { (number, callback) in
             callback(.failure("Sorry, buddy"))
         }, cancel: emptyFunc, getState: { _ in .undefined }, cancelAll: emptyFunc)
-        let avenue = SymmetricalAvenue<Int, String>(storage: .dictionaryBased(),
+        let avenue = Avenue<Int, String>(storage: .dictionaryBased(),
                                          processor: processor,
                                          callbackMode: .mainQueue)
         avenue.onError = { _ in
             XCTAssertTrue(Thread.isMainThread)
             expectation.fulfill()
         }
-        avenue.prepareItem(at: 2)
+        avenue.prepareItem(for: 2)
         waitForExpectations(timeout: 5.0)
     }
     
@@ -97,12 +97,12 @@ class AvenuesTests: XCTestCase {
                                   cancel: emptyFunc,
                                   getState: { _ in return .undefined },
                                   cancelAll: emptyFunc)
-        let avenue = SymmetricalAvenue(storage: storage,
+        let avenue = Avenue(storage: storage,
                             processor: processor,
                             callbackMode: .privateQueue)
-        avenue.prepareItem(at: 5, force: false)
+        avenue.prepareItem(for: 5, force: false)
         force = true
-        avenue.prepareItem(at: 5, force: true)
+        avenue.prepareItem(for: 5, force: true)
         waitForExpectations(timeout: 5.0)
     }
     
@@ -111,7 +111,7 @@ class AvenuesTests: XCTestCase {
                                           cancel: emptyFunc,
                                           getState: { _ in return .running },
                                           cancelAll: emptyFunc)
-        let avenue = SymmetricalAvenue(storage: .dictionaryBased(),
+        let avenue = Avenue(storage: .dictionaryBased(),
                             processor: proc,
                             callbackMode: .privateQueue)
         XCTAssertEqual(avenue.processingState(of: 5), .running)
@@ -124,7 +124,7 @@ class AvenuesTests: XCTestCase {
                                           cancel: { _ in expectation.fulfill() },
                                           getState: { _ in .undefined },
                                           cancelAll: emptyFunc)
-        let avenue = SymmetricalAvenue(storage: .dictionaryBased(),
+        let avenue = Avenue(storage: .dictionaryBased(),
                             processor: proc,
                             callbackMode: .privateQueue)
         avenue.cancelProcessing(of: 5)
@@ -164,7 +164,7 @@ class AvenuesTests: XCTestCase {
             expectation.fulfill()
         }
         XCTAssertEqual(avenue.processingState(of: 5), .none)
-        avenue.prepareItem(at: 5)
+        avenue.prepareItem(for: 5)
         waitForExpectations(timeout: 5.0)        
     }
     

@@ -38,14 +38,22 @@
             delegate?.avenue(self, didFailToFetchImageWith: key, error: error)
         }
         
-        public init(urlSessionConfiguration: URLSessionConfiguration = .default) {
-            let session = URLSession(configuration: urlSessionConfiguration)
-            let sessionLane = URLSessionProcessor(session: session).mapImage()
-            let storage: Storage<URL, UIImage> = NSCacheStorage<NSURL, UIImage>()
+        public let nscache: NSCache<NSURL, UIImage>
+        
+        public init(processor: Processor<URL, UIImage>) {
+            let cache = NSCache<NSURL, UIImage>()
+            self.nscache = cache
+            let storage: Storage<URL, UIImage> = NSCacheStorage<NSURL, UIImage>(cache: cache)
                 .mapKey({ $0 as NSURL })
             super.init(storage: storage,
-                       processor: sessionLane,
+                       processor: processor,
                        callbackMode: .mainQueue)
+        }
+        
+        public convenience init(urlSessionConfiguration: URLSessionConfiguration = .default) {
+            let session = URLSession(configuration: urlSessionConfiguration)
+            let sessionLane = URLSessionProcessor(session: session).mapImage()
+            self.init(processor: sessionLane)
         }
     
     }

@@ -77,7 +77,7 @@ public class ProtoAvenue<StoringKey : Hashable, ProcessingKey : Hashable, Value>
         self.processor.cancelAll()
     }
     
-    public func prepareItem(for key: ProcessingKey,
+    internal func internal_prepareItem(for key: ProcessingKey,
                             storingTo storingKey: StoringKey,
                             force: Bool = false) {
         processingQueue.async {
@@ -145,18 +145,18 @@ public class CallbackBasedAvenue<StoringKey : Hashable, ProcessingKey : Hashable
 
 public final class Avenue<Key : Hashable, Value> : CallbackBasedAvenue<Key, Key, Value> {
     
-    
+    public func prepareItem(for key: Key, force: Bool = false) {
+        internal_prepareItem(for: key, storingTo: key, force: force)
+    }
     
 }
 
 public final class AsymmetricalAvenue<StoringKey : Hashable, ProcessingKey : Hashable, Value> : CallbackBasedAvenue<StoringKey, ProcessingKey, Value> {
     
-}
-
-extension ProtoAvenue where StoringKey == ProcessingKey {
-    
-    public func prepareItem(for key: StoringKey, force: Bool = false) {
-        prepareItem(for: key, storingTo: key, force: force)
+    public func prepareItem(for key: ProcessingKey,
+                            storingTo storingKey: StoringKey,
+                            force: Bool = false) {
+        internal_prepareItem(for: key, storingTo: storingKey, force: force)
     }
     
 }

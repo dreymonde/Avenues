@@ -7,18 +7,6 @@
 
 #if os(iOS) || os(tvOS)
 
-//    public typealias UIImageAvenue = Avenue<IndexPath, UIImage>
-    
-    public func UIImageAvenue_Legacy() -> AsymmetricalAvenue<IndexPath, URL, UIImage> {
-        let sessionLane: Processor<URL, UIImage> = URLSessionProcessor()
-            .mapImage()
-        let storage: Storage<IndexPath, UIImage> = NSCacheStorage<NSIndexPath, UIImage>()
-            .mapKey({ $0 as NSIndexPath })
-        return AsymmetricalAvenue<IndexPath, URL, UIImage>(storage: storage,
-                                          processor: sessionLane,
-                                          callbackMode: .mainQueue)
-    }
-    
     public protocol UIImageAvenueDelegate : class {
         
         func avenue(_ avenue: UIImageAvenue, didFetchImageWith url: URL)
@@ -54,6 +42,10 @@
             let session = URLSession(configuration: urlSessionConfiguration)
             let sessionLane = URLSessionProcessor(session: session).mapImage()
             self.init(processor: sessionLane)
+        }
+        
+        public func prepareImage(for url: URL, force: Bool = false) {
+            internal_prepareItem(for: url, storingTo: url, force: force)
         }
     
     }

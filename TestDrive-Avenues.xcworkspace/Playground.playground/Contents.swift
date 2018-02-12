@@ -1,14 +1,14 @@
-# Avenues
+import UIKit
+import PlaygroundSupport
+import Avenues
 
-**Avenues** is a new approach to an old and famous problem – asynchronous loading of a resource, the most common example of which is populating an image from a remote location. The main advantage of **Avenues** is that it makes the whole process much more transparent and controllable.
+final class EntryTableViewCell : UITableViewCell {
+    
+    let entryLabel = UILabel()
+    let entryImageView = UIImageView()
+    
+}
 
-In contrast to other libraries which solves the same problem, **Avenues** doesn't sacrifice "right" for "neat". Instead, **Avenues** is highly customizable, unopiniated about your business-logic, and very transparent. You can use it as a simple out-of-the-box solution, or you can get your hands dirty and customize it to fully fit your needs.
-
-After all, **Avenues** is a really small, component-based project, so if you need even more controllable solution – build one yourself! Our source code is there to help.
-
-## Usage
-
-```swift
 struct Entry {
     let text: String
     let imageURL: URL
@@ -24,7 +24,7 @@ final class ExampleTableViewController : UITableViewController {
         tableView.register(EntryTableViewCell.self, forCellReuseIdentifier: "example")
     }
     
-    override func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
@@ -40,4 +40,5 @@ final class ExampleTableViewController : UITableViewController {
     }
     
 }
-```
+
+

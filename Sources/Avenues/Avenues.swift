@@ -10,8 +10,8 @@ import Foundation
 
 public final class Avenue<Key : Hashable, Value, Claimer : AnyObject & Hashable> {
     
-    let cache: Cache<Key, Value>
-    let processor: Processor<Key, Value>
+    public let cache: Cache<Key, Value>
+    public let processor: Processor<Key, Value>
     
     private let queue = DispatchQueue(label: "avenue-queue")
     

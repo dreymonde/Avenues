@@ -26,7 +26,12 @@ public protocol ProcessorProtocol {
 
 public extension ProcessorProtocol {
     
-    func mapKey<OtherKey>(_ transform: @escaping (OtherKey) -> Key) -> Processor<OtherKey, Value> {
+    func asProcessor() -> Processor<Key, Value> {
+        return Processor(self)
+    }
+    
+    func mapKeys<OtherKey>(to keyType: OtherKey.Type = OtherKey.self,
+                           _ transform: @escaping (OtherKey) -> Key) -> Processor<OtherKey, Value> {
         let start: Processor<OtherKey, Value>.Start = { otherKey, completion in self.start(key: transform(otherKey), completion: completion) }
         let cancel: Processor<OtherKey, Value>.Cancel = { otherKey in self.cancel(key: transform(otherKey)) }
         let getStage: Processor<OtherKey, Value>.GetState = { otherKey in self.processingState(key: transform(otherKey)) }
@@ -36,40 +41,8 @@ public extension ProcessorProtocol {
                          cancelAll: cancelAll)
     }
     
-    func mapKey<OtherKey>(_ transform: @escaping (OtherKey) -> Key?) -> Processor<OtherKey, Value> {
-        func logCannot(otherKey: OtherKey) {
-            print("Cannot convert \(otherKey) to \(Key.self)")
-        }
-        let start: Processor<OtherKey, Value>.Start = { otherKey, completion in
-            if let key = transform(otherKey) {
-                self.start(key: key, completion: completion)
-            } else {
-                logCannot(otherKey: otherKey)
-            }
-        }
-        let cancel: Processor<OtherKey, Value>.Cancel = { otherKey in
-            if let key = transform(otherKey) {
-                self.cancel(key: key)
-            } else {
-                logCannot(otherKey: otherKey)
-            }
-        }
-        let getStage: Processor<OtherKey, Value>.GetState = { otherKey in
-            if let key = transform(otherKey) {
-                return self.processingState(key: key)
-            } else {
-                logCannot(otherKey: otherKey)
-                return .undefined
-            }
-        }
-        return Processor(start: start,
-                         cancel: cancel,
-                         getState: getStage,
-                         cancelAll: cancelAll)
-        
-    }
-    
-    func mapValue<OtherValue>(_ transform: @escaping (Value) throws -> OtherValue) -> Processor<Key, OtherValue> {
+    func mapValues<OtherValue>(to valueType: OtherValue.Type = OtherValue.self,
+                               _ transform: @escaping (Value) throws -> OtherValue) -> Processor<Key, OtherValue> {
         let start: Processor<Key, OtherValue>.Start = { key, completion in
             self.start(key: key, completion: { (result) in
                 switch result {

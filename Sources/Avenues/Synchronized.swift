@@ -2,33 +2,27 @@ import Foundation
 
 internal struct Synchronized<Value> {
     
-    fileprivate let access: DispatchQueue
-    fileprivate var _value: Value
-        
-    internal init(_ value: Value, queue: DispatchQueue) {
+    private var _value: Value
+    private let queue = DispatchQueue(label: "com.avenues.synchronized-\(Value.self)", attributes: [.concurrent])
+    
+    init(_ value: Value) {
         self._value = value
-        self.access = queue
     }
     
-    internal init(_ value: Value) {
-        let queue = DispatchQueue(label: "com.avenues.synchronized-\(Value.self)")
-        self.init(value, queue: queue)
+    func read() -> Value {
+        return queue.sync { _value }
     }
     
-    internal func read() -> Value {
-        return access.sync { return _value }
-    }
-    
-    internal mutating func write(_ value: Value) {
-        access.sync {
-            self._value = value
+    mutating func write(with modify: (inout Value) -> ()) {
+        queue.sync(flags: .barrier) {
+            modify(&_value)
         }
     }
     
-    internal mutating func write(with change: (inout Value) -> ()) {
-        access.sync {
-            change(&_value)
+    mutating func write(_ newValue: Value) {
+        queue.sync(flags: .barrier) {
+            _value = newValue
         }
     }
-
+    
 }

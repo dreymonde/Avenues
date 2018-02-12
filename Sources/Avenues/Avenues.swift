@@ -23,9 +23,9 @@ public final class Avenue<Key : Hashable, Value> {
         self.processor = processor
     }
     
-    private func register(_ claimer: AnyHashable,
-                          for resourceKey: Key,
-                          setup: @escaping (Value?) -> ()) {
+    public func manualRegister(claimer: AnyHashable,
+                               for resourceKey: Key,
+                               setup: @escaping (Value?) -> ()) {
         if let existing = cache.value(forKey: resourceKey) {
             setup(existing)
         } else {
@@ -39,7 +39,7 @@ public final class Avenue<Key : Hashable, Value> {
     public func register<Claimer : AnyObject & Hashable>(_ claimer: Claimer,
                                                          for resourceKey: Key,
                                                          setup: @escaping (Claimer, Value?) -> ()) {
-        register(claimer, for: resourceKey) { [weak claimer] (value) in
+        manualRegister(claimer: claimer, for: resourceKey) { [weak claimer] (value) in
             if let claimer = claimer {
                 setup(claimer, value)
             }
@@ -101,7 +101,7 @@ extension Avenue {
     private func onBackground(task: @escaping () -> ()) {
         queue.async(execute: task)
     }
-
+    
 }
 
 extension Avenue {

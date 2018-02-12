@@ -18,7 +18,7 @@
     public func UIImageAvenue<Claimer : AnyObject & Hashable>(claimer: Claimer.Type) -> Avenue<URL, UIImage, Claimer> {
         let sessionLane = URLSessionProcessor(sessionConfiguration: .default)
             .mapImage()
-        let memoryCache: Cache<URL, UIImage> = NSCacheCache<NSURL, UIImage>()
+        let memoryCache: MemoryCache<URL, UIImage> = NSCacheCache<NSURL, UIImage>()
             .mapKeys({ $0 as NSURL })
         return Avenue(cache: memoryCache, processor: sessionLane)
     }

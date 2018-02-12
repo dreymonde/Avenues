@@ -20,10 +20,10 @@
 		7C63A86A2031B09300AE4FB4 /* Synchronized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A8682031B09200AE4FB4 /* Synchronized.swift */; };
 		7C63A86B2031B09300AE4FB4 /* Synchronized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A8682031B09200AE4FB4 /* Synchronized.swift */; };
 		7C63A86C2031B09300AE4FB4 /* Synchronized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A8682031B09200AE4FB4 /* Synchronized.swift */; };
-		7C63A86E2031B27300AE4FB4 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A86D2031B27300AE4FB4 /* Cache.swift */; };
-		7C63A86F2031B27300AE4FB4 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A86D2031B27300AE4FB4 /* Cache.swift */; };
-		7C63A8702031B27300AE4FB4 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A86D2031B27300AE4FB4 /* Cache.swift */; };
-		7C63A8712031B27300AE4FB4 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A86D2031B27300AE4FB4 /* Cache.swift */; };
+		7C63A86E2031B27300AE4FB4 /* MemoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A86D2031B27300AE4FB4 /* MemoryCache.swift */; };
+		7C63A86F2031B27300AE4FB4 /* MemoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A86D2031B27300AE4FB4 /* MemoryCache.swift */; };
+		7C63A8702031B27300AE4FB4 /* MemoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A86D2031B27300AE4FB4 /* MemoryCache.swift */; };
+		7C63A8712031B27300AE4FB4 /* MemoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A86D2031B27300AE4FB4 /* MemoryCache.swift */; };
 		7C63A8A02031C9E100AE4FB4 /* Avenues+Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A89F2031C9E100AE4FB4 /* Avenues+Images.swift */; };
 		7C63A8A12031C9E100AE4FB4 /* Avenues+Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A89F2031C9E100AE4FB4 /* Avenues+Images.swift */; };
 		7C63A8A22031C9E100AE4FB4 /* Avenues+Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A89F2031C9E100AE4FB4 /* Avenues+Images.swift */; };
@@ -72,7 +72,7 @@
 		7C63A85D2031B02600AE4FB4 /* Processor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Processor.swift; sourceTree = "<group>"; };
 		7C63A8632031B07700AE4FB4 /* URLSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSession.swift; sourceTree = "<group>"; };
 		7C63A8682031B09200AE4FB4 /* Synchronized.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Synchronized.swift; sourceTree = "<group>"; };
-		7C63A86D2031B27300AE4FB4 /* Cache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
+		7C63A86D2031B27300AE4FB4 /* MemoryCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryCache.swift; sourceTree = "<group>"; };
 		7C63A89F2031C9E100AE4FB4 /* Avenues+Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Avenues+Images.swift"; sourceTree = "<group>"; };
 		8933C7841EB5B820000D00A4 /* Avenues.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Avenues.swift; sourceTree = "<group>"; };
 		8933C7891EB5B82A000D00A4 /* AvenuesTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AvenuesTests.swift; sourceTree = "<group>"; };
@@ -178,7 +178,7 @@
 				7C63A85D2031B02600AE4FB4 /* Processor.swift */,
 				7C63A8632031B07700AE4FB4 /* URLSession.swift */,
 				7C63A8682031B09200AE4FB4 /* Synchronized.swift */,
-				7C63A86D2031B27300AE4FB4 /* Cache.swift */,
+				7C63A86D2031B27300AE4FB4 /* MemoryCache.swift */,
 				7C63A89F2031C9E100AE4FB4 /* Avenues+Images.swift */,
 			);
 			path = Avenues;
@@ -498,7 +498,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C63A85E2031B02600AE4FB4 /* Processor.swift in Sources */,
-				7C63A86E2031B27300AE4FB4 /* Cache.swift in Sources */,
+				7C63A86E2031B27300AE4FB4 /* MemoryCache.swift in Sources */,
 				7C63A8692031B09300AE4FB4 /* Synchronized.swift in Sources */,
 				8933C7851EB5B820000D00A4 /* Avenues.swift in Sources */,
 				7C63A8642031B07700AE4FB4 /* URLSession.swift in Sources */,
@@ -519,7 +519,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C63A8602031B02600AE4FB4 /* Processor.swift in Sources */,
-				7C63A8702031B27300AE4FB4 /* Cache.swift in Sources */,
+				7C63A8702031B27300AE4FB4 /* MemoryCache.swift in Sources */,
 				7C63A86B2031B09300AE4FB4 /* Synchronized.swift in Sources */,
 				8933C7871EB5B820000D00A4 /* Avenues.swift in Sources */,
 				7C63A8662031B07700AE4FB4 /* URLSession.swift in Sources */,
@@ -532,7 +532,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C63A8612031B02600AE4FB4 /* Processor.swift in Sources */,
-				7C63A8712031B27300AE4FB4 /* Cache.swift in Sources */,
+				7C63A8712031B27300AE4FB4 /* MemoryCache.swift in Sources */,
 				7C63A86C2031B09300AE4FB4 /* Synchronized.swift in Sources */,
 				8933C7881EB5B820000D00A4 /* Avenues.swift in Sources */,
 				7C63A8672031B07700AE4FB4 /* URLSession.swift in Sources */,
@@ -545,7 +545,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C63A85F2031B02600AE4FB4 /* Processor.swift in Sources */,
-				7C63A86F2031B27300AE4FB4 /* Cache.swift in Sources */,
+				7C63A86F2031B27300AE4FB4 /* MemoryCache.swift in Sources */,
 				7C63A86A2031B09300AE4FB4 /* Synchronized.swift in Sources */,
 				8933C7861EB5B820000D00A4 /* Avenues.swift in Sources */,
 				7C63A8652031B07700AE4FB4 /* URLSession.swift in Sources */,

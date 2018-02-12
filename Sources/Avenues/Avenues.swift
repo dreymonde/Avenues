@@ -10,7 +10,7 @@ import Foundation
 
 public final class Avenue<Key : Hashable, Value, Claimer : AnyObject & Hashable> {
     
-    public let cache: Cache<Key, Value>
+    public let cache: MemoryCache<Key, Value>
     public let processor: Processor<Key, Value>
     
     private let queue = DispatchQueue(label: "avenue-queue")
@@ -23,7 +23,7 @@ public final class Avenue<Key : Hashable, Value, Claimer : AnyObject & Hashable>
         queue.async(execute: task)
     }
     
-    public init(cache: Cache<Key, Value>,
+    public init(cache: MemoryCache<Key, Value>,
                 processor: Processor<Key, Value>) {
         self.cache = cache
         self.processor = processor

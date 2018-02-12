@@ -10,7 +10,7 @@ import Foundation
     
     public class URLSessionProcessor : ProcessorProtocol {
                 
-        fileprivate let validateResponse: (HTTPURLResponse) throws -> ()
+        public let validateResponse: (HTTPURLResponse) throws -> ()
         public let session: URLSession
         
         fileprivate(set) var running: Synchronized<[URL : URLSessionTask]> = Synchronized([:])
@@ -18,10 +18,19 @@ import Foundation
             return running.read()
         }
         
-        public init(sessionConfiguration: URLSessionConfiguration = .default,
+        public init(session: URLSession, validateResponse: @escaping (HTTPURLResponse) throws -> () = { _ in }) {
+            self.session = session
+            self.validateResponse = validateResponse
+        }
+        
+        public init(sessionConfiguration: URLSessionConfiguration,
                     validateResponse: @escaping (HTTPURLResponse) throws -> () = { _ in }) {
             self.session = URLSession(configuration: sessionConfiguration)
             self.validateResponse = validateResponse
+        }
+        
+        public convenience init() {
+            self.init(sessionConfiguration: .default)
         }
         
         deinit {

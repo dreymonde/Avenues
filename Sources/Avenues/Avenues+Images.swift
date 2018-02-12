@@ -6,8 +6,10 @@
 //  Copyright © 2018 Avenues. All rights reserved.
 //
 
-#if os(iOS) || os(tvOS) || os(watchOS)
+#if os(iOS) || os(tvOS)
     import UIKit
+#elseif os(watchOS)
+    import WatchKit
 #elseif os(macOS)
     import AppKit
 #endif
@@ -15,7 +17,7 @@
 
 #if os(iOS) || os(tvOS)
     
-    public func UIImageAvenue<Claimer : AnyObject & Hashable>(claimer: Claimer.Type) -> Avenue<URL, UIImage, Claimer> {
+    public func UIImageAvenue() -> Avenue<URL, UIImage> {        
         let sessionLane = URLSessionProcessor(sessionConfiguration: .default)
             .mapImage()
         let memoryCache: MemoryCache<URL, UIImage> = NSCacheCache<NSURL, UIImage>()
@@ -51,10 +53,47 @@
         
     }
     
+#endif
+
+#if os(iOS) || os(tvOS)
+    
+    extension Avenue where Value == UIImage {
+        
+        public func register(_ imageView: UIImageView, for resourceKey: Key) {
+            self.register(imageView, for: resourceKey, setup: { (view, image) in
+                view.image = image
+            })
+        }
+        
+    }
     
 #endif
 
+#if os(watchOS)
+    
+    extension Avenue where Value == UIImage {
+        
+        public func register(_ interfaceImage: WKInterfaceImage, for resourceKey: Key) {
+            self.register(interfaceImage, for: resourceKey, setup: { (interface, image) in
+                interface.setImage(image)
+            })
+        }
+        
+    }
+
+#endif
+
 #if os(macOS)
+    
+    extension Avenue where Value == NSImage {
+        
+        public func register(_ imageView: NSImageView, for resourceKey: Key) {
+            self.register(imageView, for: resourceKey, setup: { (view, image) in
+                view.image = image
+            })
+        }
+        
+    }
     
     public extension ProcessorProtocol where Value == Data {
         

@@ -4,17 +4,7 @@ internal struct Synchronized<Value> {
     
     fileprivate let access: DispatchQueue
     fileprivate var _value: Value
-    
-    @available(*, deprecated, message: "Don't use it in production code, use `get` and `set` instead")
-    internal var value: Value {
-        get {
-            return get()
-        }
-        set {
-            set(newValue)
-        }
-    }
-    
+        
     internal init(_ value: Value, queue: DispatchQueue) {
         self._value = value
         self.access = queue
@@ -25,17 +15,17 @@ internal struct Synchronized<Value> {
         self.init(value, queue: queue)
     }
     
-    internal func get() -> Value {
+    internal func read() -> Value {
         return access.sync { return _value }
     }
     
-    internal mutating func set(_ value: Value) {
+    internal mutating func write(_ value: Value) {
         access.sync {
             self._value = value
         }
     }
     
-    internal mutating func set(_ change: (inout Value) -> ()) {
+    internal mutating func write(with change: (inout Value) -> ()) {
         access.sync {
             change(&_value)
         }

@@ -14,7 +14,7 @@ public typealias ProcessorCompletion<T> = (ProcessorResult<T>) -> ()
 
 public protocol ProcessorProtocol {
     
-    associatedtype Key : Hashable
+    associatedtype Key
     associatedtype Value
     
     func start(key: Key, completion: @escaping ProcessorCompletion<Value>)
@@ -31,14 +31,14 @@ public extension ProcessorProtocol {
         let cancel: Processor<OtherKey, Value>.Cancel = { otherKey in self.cancel(key: transform(otherKey)) }
         let getStage: Processor<OtherKey, Value>.GetState = { otherKey in self.processingState(key: transform(otherKey)) }
         return Processor(start: start,
-                       cancel: cancel,
-                       getState: getStage,
-                       cancelAll: cancelAll)
+                         cancel: cancel,
+                         getState: getStage,
+                         cancelAll: cancelAll)
     }
     
     func mapKey<OtherKey>(_ transform: @escaping (OtherKey) -> Key?) -> Processor<OtherKey, Value> {
         func logCannot(otherKey: OtherKey) {
-            avenues_print("Cannot convert \(otherKey) to \(Key.self)")
+            print("Cannot convert \(otherKey) to \(Key.self)")
         }
         let start: Processor<OtherKey, Value>.Start = { otherKey, completion in
             if let key = transform(otherKey) {
@@ -66,7 +66,7 @@ public extension ProcessorProtocol {
                          cancel: cancel,
                          getState: getStage,
                          cancelAll: cancelAll)
-
+        
     }
     
     func mapValue<OtherValue>(_ transform: @escaping (Value) throws -> OtherValue) -> Processor<Key, OtherValue> {
@@ -93,7 +93,7 @@ public extension ProcessorProtocol {
     
 }
 
-public struct Processor<Key : Hashable, Value> : ProcessorProtocol {
+public struct Processor<Key, Value> : ProcessorProtocol {
     
     public typealias Start = (Key, @escaping ProcessorCompletion<Value>) -> ()
     public typealias Cancel = (Key) -> ()
@@ -139,3 +139,4 @@ public struct Processor<Key : Hashable, Value> : ProcessorProtocol {
     }
     
 }
+

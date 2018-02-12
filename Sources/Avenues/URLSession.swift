@@ -1,10 +1,5 @@
-#if os(iOS) || os(watchOS) || os(tvOS)
-    import UIKit
-    import Foundation
-#elseif os(macOS)
-    import AppKit
-    import Foundation
-#endif
+
+import Foundation
 
 #if os(iOS) || os(watchOS) || os(tvOS) || os(macOS)
     
@@ -14,45 +9,42 @@
     }
     
     public class URLSessionProcessor : ProcessorProtocol {
-        
-        public typealias Key = URL
-        public typealias Value = Data
-        
+                
         fileprivate let validateResponse: (HTTPURLResponse) throws -> ()
         public let session: URLSession
         
         fileprivate(set) var running: Synchronized<[URL : URLSessionTask]> = Synchronized([:])
         public var runningTasks: [URL : URLSessionTask] {
-            return running.get()
+            return running.read()
         }
         
-        public init(session: URLSession = URLSession(configuration: .default),
+        public init(sessionConfiguration: URLSessionConfiguration = .default,
                     validateResponse: @escaping (HTTPURLResponse) throws -> () = { _ in }) {
-            self.session = session
+            self.session = URLSession(configuration: sessionConfiguration)
             self.validateResponse = validateResponse
         }
         
         deinit {
-            avenues_print("Deinit \(self)")
+            print("Deinit \(self)")
         }
         
-        public func start(key url: URL, completion: @escaping (ProcessorResult<Value>) -> ()) {
+        public func start(key url: URL, completion: @escaping (ProcessorResult<Data>) -> ()) {
             let task = session.dataTask(with: url) { [weak self] (data, response, error) in
                 self?.didFinishTask(data: data, response: response, error: error, completion: completion)
             }
-            running.set({ (dict: inout [URL : URLSessionTask]) in dict[url] = task })
+            running.write(with: { $0[url] = task })
             task.resume()
         }
         
-        public func cancel(key: Key) {
-            running.set { (dict: inout [URL : URLSessionTask]) in
-                dict[key]?.cancel()
-                dict[key] = nil
-            }
+        public func cancel(key: URL) {
+            running.write(with: {
+                $0[key]?.cancel()
+                $0[key] = nil
+            })
         }
         
-        public func processingState(key: Key) -> ProcessingState {
-            if let task = running.get()[key] {
+        public func processingState(key: URL) -> ProcessingState {
+            if let task = running.read()[key] {
                 switch task.state {
                 case .running, .canceling:
                     return .running
@@ -72,7 +64,7 @@
         fileprivate func didFinishTask(data: Data?,
                                        response: URLResponse?,
                                        error: Error?,
-                                       completion: @escaping (ProcessorResult<Value>) -> ()) {
+                                       completion: @escaping (ProcessorResult<Data>) -> ()) {
             if let error = error {
                 completion(.failure(error))
                 return
@@ -93,5 +85,6 @@
         }
         
     }
-        
+    
 #endif
+

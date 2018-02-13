@@ -27,12 +27,12 @@ public final class Avenue<Key : Hashable, Value> {
                                for resourceKey: Key,
                                setup: @escaping (Value?) -> ()) {
         assert(Thread.isMainThread, "You can claim resources only on the main thread")
+        let claim = Claim(key: resourceKey, setup: setup)
+        claims[claimer] = claim
         if let existing = cache.value(forKey: resourceKey) {
             setup(existing)
         } else {
             setup(nil)
-            let claim = Claim(key: resourceKey, setup: setup)
-            claims[claimer] = claim
             self.run(requestFor: resourceKey)
         }
     }

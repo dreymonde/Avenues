@@ -26,6 +26,7 @@ public final class Avenue<Key : Hashable, Value> {
     public func manualRegister(claimer: AnyHashable,
                                for resourceKey: Key,
                                setup: @escaping (Value?) -> ()) {
+        assert(Thread.isMainThread, "You can claim resources only on the main thread")
         if let existing = cache.value(forKey: resourceKey) {
             setup(existing)
         } else {

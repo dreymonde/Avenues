@@ -17,12 +17,16 @@
 
 #if os(iOS) || os(tvOS)
     
-    public func UIImageAvenue() -> Avenue<URL, UIImage> {        
-        let sessionLane = URLSessionProcessor(sessionConfiguration: .default)
-            .mapImage()
-        let memoryCache: MemoryCache<URL, UIImage> = NSCacheCache<NSURL, UIImage>()
-            .mapKeys({ $0 as NSURL })
-        return Avenue(cache: memoryCache, processor: sessionLane)
+    extension Avenue {
+        
+        public static func images() -> Avenue<URL, UIImage> {
+            let session = URLSessionProcessor(sessionConfiguration: .default)
+                .mapImage()
+            let memoryCache = NSCacheCache<NSURL, UIImage>()
+                .mapKeys(to: URL.self, { $0 as NSURL })
+            return Avenue<URL, UIImage>(cache: memoryCache, processor: session)
+        }
+        
     }
     
 #endif
@@ -84,6 +88,18 @@
 #endif
 
 #if os(macOS)
+    
+    extension Avenue {
+        
+        public static func images() -> Avenue<URL, NSImage> {
+            let session = URLSessionProcessor(sessionConfiguration: .default)
+                .mapImage()
+            let memoryCache = NSCacheCache<NSURL, NSImage>()
+                .mapKeys(to: URL.self, { $0 as NSURL })
+            return Avenue<URL, NSImage>(cache: memoryCache, processor: session)
+        }
+        
+    }
     
     extension Avenue where Value == NSImage {
         

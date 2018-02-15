@@ -29,11 +29,8 @@ public final class Avenue<Key : Hashable, Value> {
         assert(Thread.isMainThread, "You can claim resources only on the main thread")
         let claim = Claim(key: resourceKey, setup: setup)
         claims[claimer] = claim
-        if let existing = cache.value(forKey: resourceKey) {
-            setup(existing)
-        } else {
-            setup(nil)
-            self.run(requestFor: resourceKey)
+        self.run(requestFor: resourceKey) { (cachedValue) in
+            setup(cachedValue)
         }
     }
     
@@ -47,7 +44,12 @@ public final class Avenue<Key : Hashable, Value> {
         }
     }
     
-    private func run(requestFor key: Key) {
+    private func run(requestFor key: Key, existingValue block: (Value?) -> ()) {
+        if let existing = cache.value(forKey: key) {
+            block(existing)
+            return
+        }
+        block(nil)
         onBackground {
             guard self.processor.processingState(key: key) != .running else {
                 return
@@ -64,7 +66,7 @@ public final class Avenue<Key : Hashable, Value> {
     }
     
     public func preload(key: Key) {
-        run(requestFor: key)
+        run(requestFor: key) { _ in print("preload: already existing") }
     }
     
     public func cancel(key: Key) {

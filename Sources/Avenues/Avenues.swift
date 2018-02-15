@@ -66,7 +66,11 @@ public final class Avenue<Key : Hashable, Value> {
     }
     
     public func preload(key: Key) {
-        run(requestFor: key) { _ in print("preload: already existing") }
+        run(requestFor: key) { pr in
+            if pr != nil {
+                print("preload: already existing:", key)
+            }
+        }
     }
     
     public func cancel(key: Key) {

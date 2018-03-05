@@ -29,10 +29,7 @@ public final class Avenue<Key : Hashable, Value> {
     
     public let cache: MemoryCache<Key, Value>
     public let scheduler: Scheduler<Key, Value>
-    public var processor: Processor<Key, Value> {
-        return scheduler.processor
-    }
-    
+
     private var claims = Claims()
     
     private let queue = DispatchQueue(label: "avenue-queue")
@@ -43,14 +40,10 @@ public final class Avenue<Key : Hashable, Value> {
         self.init(cache: cache, scheduler: sch)
     }
     
-    init(cache: MemoryCache<Key, Value>,
+    public init(cache: MemoryCache<Key, Value>,
          scheduler: Scheduler<Key, Value>) {
         self.cache = cache
         self.scheduler = scheduler
-    }
-    
-    public static func withCustomScheduler(_ customScheduler: Scheduler<Key, Value>, cache: MemoryCache<Key, Value>) -> Avenue<Key, Value> {
-        return Avenue(cache: cache, scheduler: customScheduler)
     }
     
     public func manualRegister(claimer: AnyHashable,

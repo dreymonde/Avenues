@@ -10,6 +10,12 @@ import Foundation
 
 open class Scheduler<Key, Value> {
     
+    open let processor: Processor<Key, Value>
+    
+    public init(processor: Processor<Key, Value>) {
+        self.processor = processor
+    }
+    
     open func process(key: Key, completion: @escaping (ProcessorResult<Value>) -> ()) {
         return
     }
@@ -26,11 +32,9 @@ open class Scheduler<Key, Value> {
 
 public final class AvenueScheduler<Key : Hashable, Value> : Scheduler<Key, Value> {
     
-    public let processor: Processor<Key, Value>
-    
-    public init(processor: Processor<Key, Value>) {
-        self.processor = processor
+    public override init(processor: Processor<Key, Value>) {
         self.runningTasks = Synchronized(CountedSet())
+        super.init(processor: processor)
     }
     
     private var runningTasks: Synchronized<CountedSet<Key>>

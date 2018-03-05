@@ -19,8 +19,8 @@
     
     extension Avenue {
         
-        public static func images() -> Avenue<URL, UIImage> {
-            let session = URLSessionProcessor(sessionConfiguration: .default)
+        public static func images(urlSessionConfiguration: URLSessionConfiguration = .default) -> Avenue<URL, UIImage> {
+            let session = URLSessionProcessor(sessionConfiguration: urlSessionConfiguration)
                 .mapImages()
             let memoryCache = NSCacheCache<NSURL, UIImage>()
                 .mapKeys(to: URL.self, { $0 as NSURL })
@@ -91,8 +91,8 @@
     
     extension Avenue {
         
-        public static func images() -> Avenue<URL, NSImage> {
-            let session = URLSessionProcessor(sessionConfiguration: .default)
+        public static func images(urlSessionConfiguration: URLSessionConfiguration = .default) -> Avenue<URL, NSImage> {
+            let session = URLSessionProcessor(sessionConfiguration: urlSessionConfiguration)
                 .mapImages()
             let memoryCache = NSCacheCache<NSURL, NSImage>()
                 .mapKeys(to: URL.self, { $0 as NSURL })

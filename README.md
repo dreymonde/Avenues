@@ -18,7 +18,7 @@ final class ExampleTableViewController : UITableViewController {
     
     var entries: [Entry] = []
     
-    let avenue = UIImageAvenue() // Avenue<URL, UIImage>
+    let avenue = Avenue.images() // Avenue<URL, UIImage>
     
     override func viewDidLoad() {
         tableView.register(EntryTableViewCell.self, forCellReuseIdentifier: "example")

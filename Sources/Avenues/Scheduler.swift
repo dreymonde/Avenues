@@ -23,7 +23,6 @@ public final class Scheduler<Key : Hashable, Value> {
         let shouldStart: Bool = runningTasks.transaction { (running) in
             if running.contains(key) {
                 running.add(key)
-                print("Already running")
                 return false
             }
             running.add(key)
@@ -56,10 +55,8 @@ public final class Scheduler<Key : Hashable, Value> {
         let shouldCancel: Bool = runningTasks.transaction { (running) in
             running.remove(key)
             if !running.contains(key) {
-                print("\(key.hashValue) : No more requesters, cancelling")
                 return true
             } else {
-                print("Still some requesters left")
                 return false
             }
         }

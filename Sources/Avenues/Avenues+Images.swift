@@ -15,13 +15,13 @@
 #endif
 
 
-#if os(iOS) || os(tvOS)
+#if os(iOS) || os(tvOS) || os(watchOS)
     
     extension Avenue {
         
         public static func images() -> Avenue<URL, UIImage> {
             let session = URLSessionProcessor(sessionConfiguration: .default)
-                .mapImage()
+                .mapImages()
             let memoryCache = NSCacheCache<NSURL, UIImage>()
                 .mapKeys(to: URL.self, { $0 as NSURL })
             return Avenue<URL, UIImage>(cache: memoryCache, processor: session)
@@ -35,7 +35,7 @@
     
     public extension ProcessorProtocol where Value == Data {
         
-        func mapImage() -> Processor<Key, UIImage> {
+        func mapImages() -> Processor<Key, UIImage> {
             return mapValues(UIImage.fromData)
         }
         
@@ -64,8 +64,8 @@
     extension Avenue where Value == UIImage {
         
         public func register(_ imageView: UIImageView, for resourceKey: Key) {
-            self.register(imageView, for: resourceKey, setup: { (view, image) in
-                view.image = image
+            self.register(imageView, for: resourceKey, setup: { (view, imageState) in
+                view.image = imageState.value
             })
         }
         
@@ -78,8 +78,8 @@
     extension Avenue where Value == UIImage {
         
         public func register(_ interfaceImage: WKInterfaceImage, for resourceKey: Key) {
-            self.register(interfaceImage, for: resourceKey, setup: { (interface, image) in
-                interface.setImage(image)
+            self.register(interfaceImage, for: resourceKey, setup: { (interface, imageState) in
+                interface.setImage(imageState.value)
             })
         }
         
@@ -93,7 +93,7 @@
         
         public static func images() -> Avenue<URL, NSImage> {
             let session = URLSessionProcessor(sessionConfiguration: .default)
-                .mapImage()
+                .mapImages()
             let memoryCache = NSCacheCache<NSURL, NSImage>()
                 .mapKeys(to: URL.self, { $0 as NSURL })
             return Avenue<URL, NSImage>(cache: memoryCache, processor: session)
@@ -104,8 +104,8 @@
     extension Avenue where Value == NSImage {
         
         public func register(_ imageView: NSImageView, for resourceKey: Key) {
-            self.register(imageView, for: resourceKey, setup: { (view, image) in
-                view.image = image
+            self.register(imageView, for: resourceKey, setup: { (view, imageState) in
+                view.image = imageState.value
             })
         }
         
@@ -113,7 +113,7 @@
     
     public extension ProcessorProtocol where Value == Data {
         
-        func mapImage() -> Processor<Key, NSImage> {
+        func mapImages() -> Processor<Key, NSImage> {
             return mapValues(NSImage.fromData)
         }
         

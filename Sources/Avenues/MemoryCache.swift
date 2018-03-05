@@ -28,13 +28,13 @@ extension MemoryCacheProtocol {
 
 public struct MemoryCache<Key, Value> : MemoryCacheProtocol {
     
-    private let _get: (Key) -> Value?
-    private let _set: (Value, Key) -> ()
+    private let get: (Key) -> Value?
+    private let set: (Value, Key) -> ()
     
     public init(get: @escaping (Key) -> Value?,
                 set: @escaping (Value, Key) -> ()) {
-        self._get = get
-        self._set = set
+        self.get = get
+        self.set = set
     }
     
     public init<Cache : MemoryCacheProtocol>(_ cache: Cache) where Cache.Key == Key, Cache.Value == Value {
@@ -47,12 +47,12 @@ public struct MemoryCache<Key, Value> : MemoryCacheProtocol {
     
     public func value(forKey key: Key) -> Value? {
         assertMainQueue()
-        return _get(key)
+        return get(key)
     }
     
     public func set(_ value: Value, forKey key: Key) {
         assertMainQueue()
-        _set(value, key)
+        set(value, key)
     }
     
 }
@@ -60,9 +60,7 @@ public struct MemoryCache<Key, Value> : MemoryCacheProtocol {
 extension MemoryCache where Key : Hashable {
     
     public static func dictionaryBased() -> MemoryCache<Key, Value> {
-        var dictionary: [Key : Value] = [:]
-        return MemoryCache<Key, Value>(get: { dictionary[$0] },
-                                 set: { dictionary[$1] = $0 })
+        return DictionaryBasedCache().asCache()
     }
     
 }
@@ -87,6 +85,25 @@ extension MemoryCacheProtocol {
     }
         
 }
+
+public final class DictionaryBasedCache<Key : Hashable, Value> : MemoryCacheProtocol {
+    
+    public var dictionary: [Key : Value]
+    
+    public init(dictionary: [Key : Value] = [:]) {
+        self.dictionary = dictionary
+    }
+    
+    public func value(forKey key: Key) -> Value? {
+        return dictionary[key]
+    }
+    
+    public func set(_ value: Value, forKey key: Key) {
+        dictionary[key] = value
+    }
+    
+}
+
 
 #if os(iOS) || os(OSX) || os(watchOS) || os(tvOS)
     

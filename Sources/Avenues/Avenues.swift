@@ -8,35 +8,69 @@
 
 import Foundation
 
+public enum ResourceState<Value> {
+    case existing(Value)
+    case justArrived(Value)
+    case processing
+    
+    var value: Value? {
+        switch self {
+        case .existing(let value):
+            return value
+        case .justArrived(let value):
+            return value
+        case .processing:
+            return nil
+        }
+    }
+}
+
 public final class Avenue<Key : Hashable, Value> {
     
     public let cache: MemoryCache<Key, Value>
-    public let processor: Processor<Key, Value>
+    public let scheduler: Scheduler<Key, Value>
+    public var processor: Processor<Key, Value> {
+        return scheduler.processor
+    }
     
-    private var claims: [AnyHashable : Claim] = [:]
+    private var claims = Claims()
     
     private let queue = DispatchQueue(label: "avenue-queue")
     
-    public init(cache: MemoryCache<Key, Value>,
-                processor: Processor<Key, Value>) {
+    public convenience init(cache: MemoryCache<Key, Value>,
+                            processor: Processor<Key, Value>) {
+        let sch = Scheduler(processor: processor)
+        self.init(cache: cache, scheduler: sch)
+    }
+    
+    init(cache: MemoryCache<Key, Value>,
+         scheduler: Scheduler<Key, Value>) {
         self.cache = cache
-        self.processor = processor
+        self.scheduler = scheduler
+    }
+    
+    public static func withCustomScheduler(_ customScheduler: Scheduler<Key, Value>, cache: MemoryCache<Key, Value>) -> Avenue<Key, Value> {
+        return Avenue(cache: cache, scheduler: customScheduler)
     }
     
     public func manualRegister(claimer: AnyHashable,
                                for resourceKey: Key,
-                               setup: @escaping (Value?) -> ()) {
+                               setup: @escaping (ResourceState<Value>) -> ()) {
         assert(Thread.isMainThread, "You can claim resources only on the main thread")
         let claim = Claim(key: resourceKey, setup: setup)
         claims[claimer] = claim
         self.run(requestFor: resourceKey) { (cachedValue) in
-            setup(cachedValue)
+            if let cachedValue = cachedValue {
+                setup(.existing(cachedValue))
+            } else {
+                setup(.processing)
+            }
         }
     }
     
     public func register<Claimer : AnyObject & Hashable>(_ claimer: Claimer,
                                                          for resourceKey: Key,
-                                                         setup: @escaping (Claimer, Value?) -> ()) {
+                                                         setup: @escaping (Claimer, ResourceState<Value>) -> ()) {
         manualRegister(claimer: claimer, for: resourceKey) { [weak claimer] (value) in
             if let claimer = claimer {
                 setup(claimer, value)
@@ -51,10 +85,7 @@ public final class Avenue<Key : Hashable, Value> {
         }
         block(nil)
         onBackground {
-            guard self.processor.processingState(key: key) != .running else {
-                return
-            }
-            self.processor.start(key: key) { (result) in
+            self.scheduler.process(for: key) { (result) in
                 switch result {
                 case .failure(let error):
                     print(key, error)
@@ -66,33 +97,27 @@ public final class Avenue<Key : Hashable, Value> {
     }
     
     public func preload(key: Key) {
-        run(requestFor: key) { pr in
-            if pr != nil {
-                print("preload: already existing:", key)
-            }
-        }
+        run(requestFor: key, existingValue: { _ in })
     }
     
     public func cancel(key: Key) {
         onBackground {
-            self.processor.cancel(key: key)
+            self.scheduler.cancelProcessing(key: key)
         }
     }
     
     public func cancelAll() {
         onBackground {
-            self.processor.cancelAll()
+            self.scheduler.cancelAll()
         }
     }
     
     private func resourceDidArrive(_ resource: Value, resourceKey: Key) {
         onMain {
-            let activeClaims = self.claims.filter({ (_, claim) -> Bool in
-                return claim.key == resourceKey
-            })
+            let activeClaims = self.claims.claims(for: resourceKey)
             self.cache.set(resource, forKey: resourceKey)
-            for (_, claim) in activeClaims {
-                claim.setup(resource)
+            for (claim) in activeClaims {
+                claim.setup(.justArrived(resource))
             }
         }
     }
@@ -113,10 +138,37 @@ extension Avenue {
 
 extension Avenue {
     
+    private struct Claims {
+        
+        private var claimersMap: [AnyHashable : Claim] = [:]
+        private var keysMap: [Key : Set<AnyHashable>] = [:]
+        
+        subscript(claimer: AnyHashable) -> Claim? {
+            get {
+                return claimersMap[claimer]
+            }
+            set {
+                if let oldClaim = claimersMap[claimer] {
+                    let oldKey = oldClaim.key
+                    keysMap[oldKey]?.remove(claimer)
+                }
+                claimersMap[claimer] = newValue
+                if let newClaim = newValue {
+                    keysMap[newClaim.key, default: []].insert(claimer)
+                }
+            }
+        }
+        
+        func claims(for key: Key) -> [Claim] {
+            return keysMap[key, default: []].flatMap({ claimer in claimersMap[claimer] })
+        }
+        
+    }
+    
     private struct Claim {
         
         let key: Key
-        let setup: (Value) -> ()
+        let setup: (ResourceState<Value>) -> ()
         
     }
     

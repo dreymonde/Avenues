@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		52D6D9871BEFF229002C0205 /* Avenues.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D6D97C1BEFF229002C0205 /* Avenues.framework */; };
+		7C30A68F204D3F7900E09EEC /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C30A68E204D3F7900E09EEC /* Scheduler.swift */; };
+		7C30A690204D3F7900E09EEC /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C30A68E204D3F7900E09EEC /* Scheduler.swift */; };
+		7C30A691204D3F7900E09EEC /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C30A68E204D3F7900E09EEC /* Scheduler.swift */; };
+		7C30A692204D3F7900E09EEC /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C30A68E204D3F7900E09EEC /* Scheduler.swift */; };
 		7C63A85E2031B02600AE4FB4 /* Processor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A85D2031B02600AE4FB4 /* Processor.swift */; };
 		7C63A85F2031B02600AE4FB4 /* Processor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A85D2031B02600AE4FB4 /* Processor.swift */; };
 		7C63A8602031B02600AE4FB4 /* Processor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C63A85D2031B02600AE4FB4 /* Processor.swift */; };
@@ -69,6 +73,7 @@
 		52D6D9E21BEFFF6E002C0205 /* Avenues.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Avenues.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52D6D9F01BEFFFBE002C0205 /* Avenues.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Avenues.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52D6DA0F1BF000BD002C0205 /* Avenues.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Avenues.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7C30A68E204D3F7900E09EEC /* Scheduler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scheduler.swift; sourceTree = "<group>"; };
 		7C63A85D2031B02600AE4FB4 /* Processor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Processor.swift; sourceTree = "<group>"; };
 		7C63A8632031B07700AE4FB4 /* URLSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSession.swift; sourceTree = "<group>"; };
 		7C63A8682031B09200AE4FB4 /* Synchronized.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Synchronized.swift; sourceTree = "<group>"; };
@@ -174,11 +179,12 @@
 		7C63A8622031B04000AE4FB4 /* Avenues */ = {
 			isa = PBXGroup;
 			children = (
+				7C30A68E204D3F7900E09EEC /* Scheduler.swift */,
 				8933C7841EB5B820000D00A4 /* Avenues.swift */,
+				7C63A86D2031B27300AE4FB4 /* MemoryCache.swift */,
 				7C63A85D2031B02600AE4FB4 /* Processor.swift */,
 				7C63A8632031B07700AE4FB4 /* URLSession.swift */,
 				7C63A8682031B09200AE4FB4 /* Synchronized.swift */,
-				7C63A86D2031B27300AE4FB4 /* MemoryCache.swift */,
 				7C63A89F2031C9E100AE4FB4 /* Avenues+Images.swift */,
 			);
 			path = Avenues;
@@ -498,6 +504,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C63A85E2031B02600AE4FB4 /* Processor.swift in Sources */,
+				7C30A68F204D3F7900E09EEC /* Scheduler.swift in Sources */,
 				7C63A86E2031B27300AE4FB4 /* MemoryCache.swift in Sources */,
 				7C63A8692031B09300AE4FB4 /* Synchronized.swift in Sources */,
 				8933C7851EB5B820000D00A4 /* Avenues.swift in Sources */,
@@ -519,6 +526,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C63A8602031B02600AE4FB4 /* Processor.swift in Sources */,
+				7C30A691204D3F7900E09EEC /* Scheduler.swift in Sources */,
 				7C63A8702031B27300AE4FB4 /* MemoryCache.swift in Sources */,
 				7C63A86B2031B09300AE4FB4 /* Synchronized.swift in Sources */,
 				8933C7871EB5B820000D00A4 /* Avenues.swift in Sources */,
@@ -532,6 +540,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C63A8612031B02600AE4FB4 /* Processor.swift in Sources */,
+				7C30A692204D3F7900E09EEC /* Scheduler.swift in Sources */,
 				7C63A8712031B27300AE4FB4 /* MemoryCache.swift in Sources */,
 				7C63A86C2031B09300AE4FB4 /* Synchronized.swift in Sources */,
 				8933C7881EB5B820000D00A4 /* Avenues.swift in Sources */,
@@ -545,6 +554,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C63A85F2031B02600AE4FB4 /* Processor.swift in Sources */,
+				7C30A690204D3F7900E09EEC /* Scheduler.swift in Sources */,
 				7C63A86F2031B27300AE4FB4 /* MemoryCache.swift in Sources */,
 				7C63A86A2031B09300AE4FB4 /* Synchronized.swift in Sources */,
 				8933C7861EB5B820000D00A4 /* Avenues.swift in Sources */,

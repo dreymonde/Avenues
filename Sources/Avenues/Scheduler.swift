@@ -1,0 +1,118 @@
+//
+//  Scheduler.swift
+//  NewAvenue
+//
+//  Created by Олег on 04.03.2018.
+//  Copyright © 2018 Heeveear Proto. All rights reserved.
+//
+
+import Foundation
+
+public final class Scheduler<Key : Hashable, Value> {
+    
+    public let processor: Processor<Key, Value>
+    
+    public init(processor: Processor<Key, Value>) {
+        self.processor = processor
+        self.runningTasks = Synchronized(CountedSet())
+    }
+    
+    private var runningTasks: Synchronized<CountedSet<Key>>
+    
+    public func process(for key: Key, completion: @escaping (ProcessorResult<Value>) -> ()) {
+        let shouldStart: Bool = runningTasks.transaction { (running) in
+            if running.contains(key) {
+                running.add(key)
+                print("Already running")
+                return false
+            }
+            running.add(key)
+            return true
+        }
+        if shouldStart {
+            processor.start(key: key, completion: { (result) in
+                self.request(for: key, didFinishWith: result, completion: completion)
+            })
+        }
+    }
+    
+    private func request(for key: Key,
+                         didFinishWith result: ProcessorResult<Value>,
+                         completion: @escaping (ProcessorResult<Value>) -> ()) {
+        let shouldComplete: Bool = self.runningTasks.transaction { running in
+            if running.contains(key) {
+                running.clear(key)
+                return true
+            }
+            return false
+        }
+        if shouldComplete {
+            completion(result)
+        }
+        
+    }
+    
+    public func cancelProcessing(key: Key) {
+        let shouldCancel: Bool = runningTasks.transaction { (running) in
+            running.remove(key)
+            if !running.contains(key) {
+                print("\(key.hashValue) : No more requesters, cancelling")
+                return true
+            } else {
+                print("Still some requesters left")
+                return false
+            }
+        }
+        if shouldCancel {
+            processor.cancel(key: key)
+        }
+    }
+    
+    public func cancelAll() {
+        runningTasks.transaction { (running) in
+            running = CountedSet()
+        }
+        processor.cancelAll()
+    }
+    
+}
+
+internal struct CountedSet<Element : Hashable> {
+    
+    private var storage: [Element : UInt] = [:]
+    
+    init() { }
+    
+    init<C : Collection>(_ collection: C) where C.Element == Element {
+        for element in collection {
+            self.add(element)
+        }
+    }
+    
+    func contains(_ element: Element) -> Bool {
+        return count(for: element) > 0
+    }
+    
+    func count(for key: Element) -> UInt {
+        return storage[key, default: 0]
+    }
+    
+    mutating func add(_ element: Element) {
+        storage[element, default: 0] += 1
+    }
+    
+    mutating func remove(_ element: Element) {
+        if let currentCount = storage[element] {
+            if currentCount > 1 {
+                storage[element] = currentCount - 1
+            } else {
+                storage.removeValue(forKey: element)
+            }
+        }
+    }
+    
+    mutating func clear(_ element: Element) {
+        storage.removeValue(forKey: element)
+    }
+    
+}

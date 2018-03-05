@@ -19,6 +19,13 @@ internal struct Synchronized<Value> {
         }
     }
     
+    @discardableResult
+    mutating func transaction<Return>(with modify: (inout Value) -> (Return)) -> Return {
+        return queue.sync(flags: .barrier) {
+            return modify(&_value)
+        }
+    }
+    
     mutating func write(_ newValue: Value) {
         queue.sync(flags: .barrier) {
             _value = newValue

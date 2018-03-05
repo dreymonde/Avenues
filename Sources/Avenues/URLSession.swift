@@ -13,12 +13,10 @@ import Foundation
         public let validateResponse: (HTTPURLResponse) throws -> ()
         public let session: URLSession
         
-        fileprivate(set) var running: Synchronized<[URL : URLSessionTask]> = Synchronized([:])
-        public var runningTasks: [URL : URLSessionTask] {
-            return running.read()
-        }
+        fileprivate(set) var tasks: Synchronized<[URL : URLSessionTask]> = Synchronized([:])
         
-        public init(session: URLSession, validateResponse: @escaping (HTTPURLResponse) throws -> () = { _ in }) {
+        public init(session: URLSession,
+                    validateResponse: @escaping (HTTPURLResponse) throws -> () = { _ in }) {
             self.session = session
             self.validateResponse = validateResponse
         }
@@ -41,29 +39,15 @@ import Foundation
             let task = session.dataTask(with: url) { [weak self] (data, response, error) in
                 self?.didFinishTask(data: data, response: response, error: error, completion: completion)
             }
-            running.write(with: { $0[url] = task })
+            tasks.write(with: { $0[url] = task })
             task.resume()
         }
         
-        public func cancel(key: URL) {
-            running.write(with: {
-                $0[key]?.cancel()
-                $0[key] = nil
+        public func cancel(key url: URL) {
+            tasks.write(with: {
+                $0[url]?.cancel()
+                $0.removeValue(forKey: url)
             })
-        }
-        
-        public func processingState(key: URL) -> ProcessingState {
-            if let task = running.read()[key] {
-                switch task.state {
-                case .running, .canceling:
-                    return .running
-                case .completed:
-                    return .completed
-                case .suspended:
-                    return .none
-                }
-            }
-            return .none
         }
         
         public func cancelAll() {

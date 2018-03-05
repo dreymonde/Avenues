@@ -36,12 +36,12 @@ public final class Avenue<Key : Hashable, Value> {
     
     public convenience init(cache: MemoryCache<Key, Value>,
                             processor: Processor<Key, Value>) {
-        let sch = Scheduler(processor: processor)
+        let sch = AvenueScheduler(processor: processor)
         self.init(cache: cache, scheduler: sch)
     }
     
     public init(cache: MemoryCache<Key, Value>,
-         scheduler: Scheduler<Key, Value>) {
+                scheduler: Scheduler<Key, Value>) {
         self.cache = cache
         self.scheduler = scheduler
     }
@@ -78,7 +78,7 @@ public final class Avenue<Key : Hashable, Value> {
         }
         block(nil)
         onBackground {
-            self.scheduler.process(for: key) { (result) in
+            self.scheduler.process(key: key) { (result) in
                 switch result {
                 case .failure(let error):
                     print(key, error)

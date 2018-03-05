@@ -8,7 +8,23 @@
 
 import Foundation
 
-public final class Scheduler<Key : Hashable, Value> {
+open class Scheduler<Key, Value> {
+    
+    open func process(key: Key, completion: @escaping (ProcessorResult<Value>) -> ()) {
+        return
+    }
+    
+    open func cancelProcessing(key: Key) {
+        return
+    }
+    
+    open func cancelAll() {
+        return
+    }
+    
+}
+
+public final class AvenueScheduler<Key : Hashable, Value> : Scheduler<Key, Value> {
     
     public let processor: Processor<Key, Value>
     
@@ -19,7 +35,7 @@ public final class Scheduler<Key : Hashable, Value> {
     
     private var runningTasks: Synchronized<CountedSet<Key>>
     
-    public func process(for key: Key, completion: @escaping (ProcessorResult<Value>) -> ()) {
+    public override func process(key: Key, completion: @escaping (ProcessorResult<Value>) -> ()) {
         let shouldStart: Bool = runningTasks.transaction { (running) in
             if running.contains(key) {
                 running.add(key)
@@ -51,7 +67,7 @@ public final class Scheduler<Key : Hashable, Value> {
         
     }
     
-    public func cancelProcessing(key: Key) {
+    public override func cancelProcessing(key: Key) {
         let shouldCancel: Bool = runningTasks.transaction { (running) in
             running.remove(key)
             if !running.contains(key) {
@@ -65,7 +81,7 @@ public final class Scheduler<Key : Hashable, Value> {
         }
     }
     
-    public func cancelAll() {
+    public override func cancelAll() {
         runningTasks.transaction { (running) in
             running = CountedSet()
         }

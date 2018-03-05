@@ -54,13 +54,13 @@ public final class AvenueScheduler<Key : Hashable, Value> : Scheduler<Key, Value
     private func request(for key: Key,
                          didFinishWith result: ProcessorResult<Value>,
                          completion: @escaping (ProcessorResult<Value>) -> ()) {
-        let shouldComplete: Bool = self.runningTasks.transaction { running in
+        let shouldComplete: Bool = self.runningTasks.transaction(with: { running in
             if running.contains(key) {
                 running.clear(key)
                 return true
             }
             return false
-        }
+        })
         if shouldComplete {
             completion(result)
         }
@@ -68,23 +68,23 @@ public final class AvenueScheduler<Key : Hashable, Value> : Scheduler<Key, Value
     }
     
     public override func cancelProcessing(key: Key) {
-        let shouldCancel: Bool = runningTasks.transaction { (running) in
+        let shouldCancel: Bool = runningTasks.transaction(with: { (running) in
             running.remove(key)
             if !running.contains(key) {
                 return true
             } else {
                 return false
             }
-        }
+        })
         if shouldCancel {
             processor.cancel(key: key)
         }
     }
     
     public override func cancelAll() {
-        runningTasks.transaction { (running) in
+        runningTasks.transaction(with: { (running) in
             running = CountedSet()
-        }
+        })
         processor.cancelAll()
     }
     

@@ -13,7 +13,7 @@ public enum ResourceState<Value> {
     case justArrived(Value)
     case processing
     
-    var value: Value? {
+    public var value: Value? {
         switch self {
         case .existing(let value):
             return value
@@ -87,6 +87,10 @@ public final class Avenue<Key : Hashable, Value> {
                 }
             }
         }
+    }
+    
+    public func forceLoad(key: Key) {
+        run(requestFor: key, existingValue: { _ in })
     }
     
     public func preload(key: Key) {

@@ -8,38 +8,20 @@
 
 import Foundation
 
-open class Scheduler<Key, Value> {
+public final class Scheduler<Key : Hashable, Value> {
     
-    open let processor: Processor<Key, Value>
+    public let processor: Processor<Key, Value>
     
     public init(processor: Processor<Key, Value>) {
         self.processor = processor
-    }
-    
-    open func process(key: Key, completion: @escaping (ProcessorResult<Value>) -> ()) {
-        return
-    }
-    
-    open func cancelProcessing(key: Key) {
-        return
-    }
-    
-    open func cancelAll() {
-        return
-    }
-    
-}
-
-public final class AvenueScheduler<Key : Hashable, Value> : Scheduler<Key, Value> {
-    
-    public override init(processor: Processor<Key, Value>) {
         self.runningTasks = Synchronized(CountedSet())
-        super.init(processor: processor)
     }
+    
+    public var completion: (Key, ProcessorResult<Value>) -> Void = { _, _ in print("[AVENUES] Unset completion on Scheduler") }
     
     private var runningTasks: Synchronized<CountedSet<Key>>
     
-    public override func process(key: Key, completion: @escaping (ProcessorResult<Value>) -> ()) {
+    public func requestProcessing(key: Key) {
         let shouldStart: Bool = runningTasks.transaction { (running) in
             if running.contains(key) {
                 running.add(key)
@@ -50,14 +32,13 @@ public final class AvenueScheduler<Key : Hashable, Value> : Scheduler<Key, Value
         }
         if shouldStart {
             processor.start(key: key, completion: { (result) in
-                self.request(for: key, didFinishWith: result, completion: completion)
+                self.request(for: key, didFinishWith: result)
             })
         }
     }
     
     private func request(for key: Key,
-                         didFinishWith result: ProcessorResult<Value>,
-                         completion: @escaping (ProcessorResult<Value>) -> ()) {
+                         didFinishWith result: ProcessorResult<Value>) {
         let shouldComplete: Bool = self.runningTasks.transaction(with: { running in
             if running.contains(key) {
                 running.clear(key)
@@ -66,12 +47,12 @@ public final class AvenueScheduler<Key : Hashable, Value> : Scheduler<Key, Value
             return false
         })
         if shouldComplete {
-            completion(result)
+            completion(key, result)
         }
         
     }
     
-    public override func cancelProcessing(key: Key) {
+    public func cancelProcessing(key: Key) {
         let shouldCancel: Bool = runningTasks.transaction(with: { (running) in
             running.remove(key)
             if !running.contains(key) {
@@ -85,7 +66,7 @@ public final class AvenueScheduler<Key : Hashable, Value> : Scheduler<Key, Value
         }
     }
     
-    public override func cancelAll() {
+    public func cancelAll() {
         runningTasks.transaction(with: { (running) in
             running = CountedSet()
         })

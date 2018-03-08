@@ -36,14 +36,17 @@ public final class Avenue<Key : Hashable, Value> {
     
     public convenience init(cache: MemoryCache<Key, Value>,
                             processor: Processor<Key, Value>) {
-        let sch = AvenueScheduler(processor: processor)
-        self.init(cache: cache, scheduler: sch)
+        let scheduler = Scheduler(processor: processor)
+        self.init(cache: cache, scheduler: scheduler)
     }
     
     public init(cache: MemoryCache<Key, Value>,
                 scheduler: Scheduler<Key, Value>) {
         self.cache = cache
         self.scheduler = scheduler
+        self.scheduler.completion = { [weak self] (key, result) in
+            self?.processing(for: key, didFinishWith: result)
+        }
     }
     
     public func manualRegister(claimer: AnyHashable,
@@ -78,14 +81,7 @@ public final class Avenue<Key : Hashable, Value> {
         }
         block(nil)
         onBackground {
-            self.scheduler.process(key: key) { (result) in
-                switch result {
-                case .failure(let error):
-                    print(key, error)
-                case .success(let value):
-                    self.resourceDidArrive(value, resourceKey: key)
-                }
-            }
+            self.scheduler.requestProcessing(key: key)
         }
     }
     
@@ -106,6 +102,15 @@ public final class Avenue<Key : Hashable, Value> {
     public func cancelAll() {
         onBackground {
             self.scheduler.cancelAll()
+        }
+    }
+    
+    private func processing(for key: Key, didFinishWith result: ProcessorResult<Value>) {
+        switch result {
+        case .failure(let error):
+            print(key, error)
+        case .success(let value):
+            self.resourceDidArrive(value, resourceKey: key)
         }
     }
     
@@ -137,27 +142,27 @@ extension Avenue {
     
     private struct Claims {
         
-        private var claimersMap: [AnyHashable : Claim] = [:]
-        private var keysMap: [Key : Set<AnyHashable>] = [:]
+        private var claimsForClaimer: [AnyHashable : Claim] = [:]
+        private var claimersForKey: [Key : Set<AnyHashable>] = [:]
         
         subscript(claimer: AnyHashable) -> Claim? {
             get {
-                return claimersMap[claimer]
+                return claimsForClaimer[claimer]
             }
             set {
-                if let oldClaim = claimersMap[claimer] {
+                if let oldClaim = claimsForClaimer[claimer] {
                     let oldKey = oldClaim.key
-                    keysMap[oldKey]?.remove(claimer)
+                    claimersForKey[oldKey]?.remove(claimer)
                 }
-                claimersMap[claimer] = newValue
+                claimsForClaimer[claimer] = newValue
                 if let newClaim = newValue {
-                    keysMap[newClaim.key, default: []].insert(claimer)
+                    claimersForKey[newClaim.key, default: []].insert(claimer)
                 }
             }
         }
         
         func claims(for key: Key) -> [Claim] {
-            return keysMap[key, default: []].flatMap({ claimer in claimersMap[claimer] })
+            return claimersForKey[key, default: []].flatMap({ claimer in claimsForClaimer[claimer] })
         }
         
     }

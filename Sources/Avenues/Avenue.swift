@@ -31,14 +31,7 @@ public final class Avenue<Key : Hashable, Value> {
     public let scheduler: Scheduler<Key, Value>
 
     private var claims = Claims()
-    
-    private let queue = DispatchQueue(label: "avenue-queue")
-    
-    public convenience init(cache: MemoryCache<Key, Value>,
-                            processor: Processor<Key, Value>) {
-        let scheduler = Scheduler(processor: processor)
-        self.init(cache: cache, scheduler: scheduler)
-    }
+    private let queue = DispatchQueue(label: "avenue-dispatch-queue")
     
     public init(cache: MemoryCache<Key, Value>,
                 scheduler: Scheduler<Key, Value>) {
@@ -47,6 +40,12 @@ public final class Avenue<Key : Hashable, Value> {
         self.scheduler.completion = { [weak self] (key, result) in
             self?.processing(for: key, didFinishWith: result)
         }
+    }
+    
+    public convenience init(cache: MemoryCache<Key, Value>,
+                            processor: Processor<Key, Value>) {
+        let scheduler = Scheduler(processor: processor)
+        self.init(cache: cache, scheduler: scheduler)
     }
     
     public func manualRegister(claimer: AnyHashable,
@@ -80,7 +79,7 @@ public final class Avenue<Key : Hashable, Value> {
             return
         }
         block(nil)
-        onBackground {
+        onBackgroundQueue {
             self.scheduler.requestProcessing(key: key)
         }
     }
@@ -94,13 +93,13 @@ public final class Avenue<Key : Hashable, Value> {
     }
     
     public func cancel(key: Key) {
-        onBackground {
+        onBackgroundQueue {
             self.scheduler.cancelProcessing(key: key)
         }
     }
     
     public func cancelAll() {
-        onBackground {
+        onBackgroundQueue {
             self.scheduler.cancelAll()
         }
     }
@@ -115,7 +114,7 @@ public final class Avenue<Key : Hashable, Value> {
     }
     
     private func resourceDidArrive(_ resource: Value, resourceKey: Key) {
-        onMain {
+        onMainQueue {
             let activeClaims = self.claims.claims(for: resourceKey)
             self.cache.set(resource, forKey: resourceKey)
             for (claim) in activeClaims {
@@ -128,11 +127,11 @@ public final class Avenue<Key : Hashable, Value> {
 
 extension Avenue {
     
-    private func onMain(task: @escaping () -> ()) {
+    private func onMainQueue(task: @escaping () -> ()) {
         DispatchQueue.main.async(execute: task)
     }
     
-    private func onBackground(task: @escaping () -> ()) {
+    private func onBackgroundQueue(task: @escaping () -> ()) {
         queue.async(execute: task)
     }
     

@@ -37,8 +37,8 @@ public final class Avenue<Key : Hashable, Value> {
                 scheduler: Scheduler<Key, Value>) {
         self.cache = cache
         self.scheduler = scheduler
-        self.scheduler.completion = { [weak self] (key, result) in
-            self?.processing(for: key, didFinishWith: result)
+        self.scheduler.didFinish.delegate(to: self) { (self, args) in
+            self.processing(for: args.key, didFinishWith: args.result)
         }
     }
     

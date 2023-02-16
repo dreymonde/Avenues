@@ -17,7 +17,7 @@ public final class Scheduler<Key : Hashable, Value> {
         self.runningTasks = Synchronized(CountedSet())
     }
     
-    public var didFinish = Avenues.Delegated<(key: Key, result: ProcessorResult<Value>), Void>()
+    public var didFinish = Avenues.AvenuesDelegated<(key: Key, result: ProcessorResult<Value>), Void>()
     
     private var runningTasks: Synchronized<CountedSet<Key>>
     
@@ -75,7 +75,7 @@ public final class Scheduler<Key : Hashable, Value> {
     
 }
 
-public struct Delegated<Input, Output> {
+public struct AvenuesDelegated<Input, Output> {
     
     private(set) var callback: ((Input) -> Output?)?
     
@@ -101,7 +101,7 @@ public struct Delegated<Input, Output> {
     
 }
 
-extension Delegated {
+extension AvenuesDelegated {
     
     public mutating func stronglyDelegate<Target : AnyObject>(to target: Target,
                                                               with callback: @escaping (Target, Input) -> Output) {
@@ -120,7 +120,7 @@ extension Delegated {
     
 }
 
-extension Delegated where Output == Void {
+extension AvenuesDelegated where Output == Void {
     
     public func call(_ input: Input) {
         self.callback?(input)

@@ -161,7 +161,7 @@ extension Avenue {
         }
         
         func claims(for key: Key) -> [Claim] {
-            return claimersForKey[key, default: []].flatMap({ claimer in claimsForClaimer[claimer] })
+            return claimersForKey[key, default: []].compactMap({ claimer in claimsForClaimer[claimer] })
         }
         
     }

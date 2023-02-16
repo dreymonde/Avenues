@@ -68,9 +68,15 @@ extension MemoryCache where Key : Hashable {
 extension MemoryCacheProtocol {
     
     public func mapKeys<OtherKey>(to keyType: OtherKey.Type = OtherKey.self,
-                                  _ transform: @escaping (OtherKey) -> Key) -> MemoryCache<OtherKey, Value> {
-        let get: (OtherKey) -> Value? = { otherKey in return self.value(forKey: transform(otherKey)) }
-        let set: (Value, OtherKey) -> () = { value, otherKey in self.set(value, forKey: transform(otherKey)) }
+                                  _ transform: @escaping (OtherKey) -> Key?) -> MemoryCache<OtherKey, Value> {
+        let get: (OtherKey) -> Value? = { otherKey in
+            transform(otherKey).flatMap { self.value(forKey: $0) }
+        }
+        let set: (Value, OtherKey) -> () = { value, otherKey in
+            if let otherKey = transform(otherKey) {
+                self.set(value, forKey: otherKey)
+            }
+        }
         return MemoryCache(get: get, set: set)
     }
     
